@@ -1,21 +1,21 @@
+#pragma once
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <string>
 
-using namespace std;
-
 class Window {
-    public:
-        Window(int width, int height, const string& title);
+public:
+    Window(int width, int height, const std::string& title);
 
-        bool shouldClose() { 
-            return glfwWindowShouldClose(window); 
-        }
+    bool shouldClose();
+    void swapBuffers();
+    
+    GLFWwindow* getNativeWindow() const { return window; }
+    float getScreenRatio() const { return m_screenRatio; }
 
-        void swapBuffers() { 
-            glfwSwapBuffers(window); 
-        }
+    static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
-    private:
-        GLFWwindow* window;
+private:
+    GLFWwindow* window;
+    float m_screenRatio = 1.0f;
 };
