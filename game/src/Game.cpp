@@ -32,11 +32,14 @@ void Game::init() {
     //           R     G     B     A
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
+    cowPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+
     try {
         shader.reset(new Shader("../../src/shader_vertex.glsl", "../../src/shader_fragment.glsl"));
-        models["sphere"].reset(new Model("../../data/sphere.obj"));
-        models["bunny"].reset(new Model("../../data/bunny.obj"));
-        models["plane"].reset(new Model("../../data/plane.obj"));
+        // models["sphere"].reset(new Model("../../data/sphere.obj"));
+        // models["bunny"].reset(new Model("../../data/bunny.obj"));
+        // models["plane"].reset(new Model("../../data/plane.obj"));
+        models["cow"].reset(new Model("../../data/cow.obj"));
     } catch (exception& e) {
         fprintf(stderr, "Error opening data resources \"%s\".\n", e.what());
     }
@@ -70,25 +73,31 @@ void Game::render() {
     shader->setMat4("projection", projectionMatrix);
     
     // Desenha a esfera
-    glm::mat4 modelMatrix = Matrix_Translate(-1.0f, 0.0f, 0.0f);
-    shader->setMat4("model", modelMatrix);
-    shader->setInt("object_id", 0);
-    models["sphere"]->draw();
+    // glm::mat4 modelMatrix = Matrix_Translate(-1.0f, 0.0f, 0.0f);
+    // shader->setMat4("model", modelMatrix);
+    // shader->setInt("object_id", 0);
+    // models["sphere"]->draw();
 
     // Desenha o coelho
-    modelMatrix = Matrix_Translate(1.0f, 0.0f, 0.0f)
-                * Matrix_Rotate_Z(bunnyAngleZ)
-                * Matrix_Rotate_Y(bunnyAngleY)
-                * Matrix_Rotate_X(bunnyAngleX);
-    shader->setMat4("model", modelMatrix);
-    shader->setInt("object_id", 1);
-    models["bunny"]->draw();
+    // modelMatrix = Matrix_Translate(1.0f, 0.0f, 0.0f)
+    //             * Matrix_Rotate_Z(bunnyAngleZ)
+    //             * Matrix_Rotate_Y(bunnyAngleY)
+    //             * Matrix_Rotate_X(bunnyAngleX);
+    // shader->setMat4("model", modelMatrix);
+    // shader->setInt("object_id", 1);
+    // models["bunny"]->draw();
 
     // Desenha o plano
-    modelMatrix = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(2.0f, 1.0f, 2.0f);
+    // modelMatrix = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(2.0f, 1.0f, 2.0f);
+    // shader->setMat4("model", modelMatrix);
+    // shader->setInt("object_id", 2);
+    // models["plane"]->draw();
+
+    // desenha a vaca
+    glm::mat4 modelMatrix = Matrix_Translate(cowPosition.x, cowPosition.y, cowPosition.z);
     shader->setMat4("model", modelMatrix);
-    shader->setInt("object_id", 2);
-    models["plane"]->draw();
+    shader->setInt("object_id", 3);
+    models["cow"]->draw();
 }
 
 void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
@@ -107,14 +116,38 @@ void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
         }
         
         float delta = 3.141592 / 16.0f;
-        if (key == GLFW_KEY_X) {
-            bunnyAngleX += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
+        // if (key == GLFW_KEY_X) {
+        //     bunnyAngleX += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
+        // }
+        // if (key == GLFW_KEY_Y) {
+        //     bunnyAngleY += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
+        // }
+        // if (key == GLFW_KEY_Z) {
+        //     bunnyAngleZ += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
+        // }
+
+        glm::mat4 cowOrientation = Matrix_Rotate_Z(cowAngleZ) *
+                                   Matrix_Rotate_Y(cowAngleY) *
+                                   Matrix_Rotate_X(cowAngleX);
+
+        glm::vec3 cowForward(1.0f, 0.0f, 0.0f); // +x é para frente
+        glm::vec3 cowRight(0.0f, 0.0f, 1.0f); // +z é direita
+
+        if (key == GLFW_KEY_W) {
+            glm::vec3 forwardVec = glm::vec3(cowOrientation * glm::vec4(cowForward, 0.0f));
+            cowPosition += forwardVec * 0.1f;
         }
-        if (key == GLFW_KEY_Y) {
-            bunnyAngleY += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
+        if (key == GLFW_KEY_S) {
+            glm::vec3 backwardVec = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
+            cowPosition += backwardVec * 0.1f;
         }
-        if (key == GLFW_KEY_Z) {
-            bunnyAngleZ += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
+        if (key == GLFW_KEY_A) {
+            glm::vec3 leftVec = glm::vec3(cowOrientation * glm::vec4(-cowRight, 0.0f));
+            cowPosition += leftVec * 0.1f;
+        }
+        if (key == GLFW_KEY_D) {
+            glm::vec3 rightVec = glm::vec3(cowOrientation * glm::vec4(cowRight, 0.0f));
+            cowPosition += rightVec * 0.1f;
         }
     }
 }

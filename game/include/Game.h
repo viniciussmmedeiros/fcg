@@ -39,8 +39,13 @@ class Game {
         // de tempo. Utilizadas no callback CursorPosCallback() abaixo.
         double lastCursorPosX = 0.0, lastCursorPosY = 0.0;
         
+        float cowAngleX = 0.0f;
+        float cowAngleY = 0.0f;
+        float cowAngleZ = 0.0f;
+        glm::vec3 cowPosition;
+
         // Ângulos de Euler que controlam a rotação de um dos cubos da cena virtual
-        float bunnyAngleX = 0.0f;
-        float bunnyAngleY = 0.0f;
-        float bunnyAngleZ = 0.0f;
+        // float bunnyAngleX = 0.0f;
+        // float bunnyAngleY = 0.0f;
+        // float bunnyAngleZ = 0.0f;
 };
