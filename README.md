@@ -10,3 +10,16 @@ Jogabilidade e elementos:
 - Haverá um timer iniciado no começo da partida, e se o jogador demorar demais (tempo a ser definido) uma esfera gigante começa a rolar no corredor. Se a esfera alcançar a vaca, o jogador perde.
 
 ToDo:
+[ ] revisar os 15% de uso de código de externo / lab
+[ ] revisar se os códigos prontos usados estão referenciados corretamente ("FONTE")
+[X] usar um modelo geométrico (usamos cow.obj) a ser carregado com tiniobjloader
+[ ] transformações geométricas realizada pelo usuário, além da câmera
+[ ] implementar câmera look-at e câmera livre
+[ ] duas ou mais instâncias de um mesmo objeto
+[ ] três testes de intersecção (ex: cubo-cubo, cubo-plano, e ponto-esfera) --> collisions.cpp
+[ ] iluminação de lambert e blinn-phong. 
+[ ] ao menos um objeto com gouraud
+[ ] ao menos um objeto com phong
+[ ] todos os objetos devem ter textura
+[ ] ao menos um objeto com movimentação relacionada a curva de bezier
+[ ] todas as movimentações devem ser computadas baseado no tempo
