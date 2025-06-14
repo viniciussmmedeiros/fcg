@@ -66,7 +66,23 @@ void Game::render() {
 
     shader->use();
 
+    if(camera.getUseFreeCamera()) {
+        // glm::mat4 cowOrientation = Matrix_Rotate_Z(cowAngleZ) *
+        //                     Matrix_Rotate_Y(cowAngleY) *
+        //                     Matrix_Rotate_X(cowAngleX);
+
+        // glm::vec3 cowForward(1.0f, 0.0f, 0.0f);
+        // float cameraDistance = 2.0f;
+        // glm::vec3 cameraOffset = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
+        // glm::vec3 currFreePosition = cowPosition + cameraOffset * cameraDistance;
+
+        // float cameraHeight = 1.0f;
+        // currFreePosition += glm::vec3(0.0f, cameraHeight, 0.0f);
+
+        // camera.setPosition(currFreePosition);
+    }
     glm::mat4 viewMatrix = camera.getVirtualCamera();
+
     glm::mat4 projectionMatrix = camera.getProjectionMatrix(window.getScreenRatio());
 
     shader->setMat4("view", viewMatrix);
@@ -133,6 +149,30 @@ void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
         glm::vec3 cowForward(1.0f, 0.0f, 0.0f); // +x é para frente
         glm::vec3 cowRight(0.0f, 0.0f, 1.0f); // +z é direita
 
+        if (key == GLFW_KEY_V) {
+            camera.setFreeCamera(!camera.getUseFreeCamera());
+
+            if(camera.getUseFreeCamera()) {
+                // float cameraDistance = 2.0f;
+                // glm::vec3 cameraOffset = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
+                // glm::vec3 currFreePosition = cowPosition + cameraOffset * cameraDistance;
+
+                // float altura = 1.0f;
+                // currFreePosition += glm::vec3(0.0f, altura, 0.0f);
+
+                // glm::vec3 toCow = glm::normalize(cowPosition - currFreePosition);
+                // float theta = atan2(toCow.x, toCow.z);
+                // float phi = -asin(toCow.y);
+
+                // camera.setCameraTheta(theta);
+                // camera.setCameraPhi(phi);
+
+                camera.setCameraPhi(0);
+                camera.setCameraTheta(4.141592f);
+                // camera.setPosition(cowPosition);
+            }
+        }
+
         if (key == GLFW_KEY_W) {
             glm::vec3 forwardVec = glm::vec3(cowOrientation * glm::vec4(cowForward, 0.0f));
             cowPosition += forwardVec * 0.1f;
@@ -189,3 +229,7 @@ void Game::handleCursorPos(double xpos, double ypos) {
 void Game::handleScroll(double xoffset, double yoffset) {
     camera.scrollCallback(yoffset);
 }
+
+// glm::vec4 getFreeCameraPosition() {
+    
+// }
