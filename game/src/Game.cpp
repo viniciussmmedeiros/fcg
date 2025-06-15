@@ -9,6 +9,9 @@ Game::Game() : window(800, 800, "Escape da Vaca") {
     init();
 }
 
+// Número de texturas carregadas pela função LoadTextureImage()
+GLuint g_NumLoadedTextures = 0;
+
 void Game::init() {
     glfwSetWindowUserPointer(window.getNativeWindow(), this);
 
@@ -33,6 +36,10 @@ void Game::init() {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     cowPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    texture = std::unique_ptr<Texture>(new Texture());
+    texture->LoadTextureImage("../../data/cow_surface.jpg", g_NumLoadedTextures);
+    g_NumLoadedTextures += 1;
 
     try {
         shader.reset(new Shader("../../src/shader_vertex.glsl", "../../src/shader_fragment.glsl"));

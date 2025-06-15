@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "Model.h"
 #include "Input.h"
+#include "Texture.h"
 #include <memory>
 #include <map>
 
@@ -25,13 +26,14 @@ class Game {
         Window window;
         Camera camera;
         std::unique_ptr<Shader> shader;
+        std::unique_ptr<Texture> texture;
         std::map<std::string, std::unique_ptr<Model>> models;
 
         // Se o usuário pressionou o botão esquerdo do mouse, guardamos a
         // posição atual do cursor nas variáveis g_LastCursorPosX e
         // g_LastCursorPosY.  Também, setamos a variável
         // g_LeftMouseButtonPressed como true, para saber que o usuário está
-        // com o botão esquerdo pressionado.
+        // com o botão esquerdo pressionado.s
         bool leftMouseButtonPressed = false;
 
         // Variáveis globais que armazenam a última posição do cursor do mouse, para
