@@ -30,10 +30,25 @@ Shader::Shader(const string& vertexPath, const string& fragmentPath) {
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    // glUniform1i(glGetUniformLocation(program_id, "TextureImage0"), 0);
+    // glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 1);
+    // glUniform1i(glGetUniformLocation(program_id, "TextureImage2"), 2);
 }
 
 void Shader::use() const {
+    g_bbox_min_uniform = glGetUniformLocation(program_id, "bbox_min");
+    g_bbox_max_uniform = glGetUniformLocation(program_id, "bbox_max");
+
     glUseProgram(program_id);
+}
+
+GLint Shader::getBBoxMinUniform() const {
+    return g_bbox_min_uniform;
+}
+
+GLint Shader::getBBoxMaxUniform() const {
+    return g_bbox_max_uniform;
 }
 
 void Shader::setMat4(const string& name, const glm::mat4& mat) {
@@ -42,6 +57,10 @@ void Shader::setMat4(const string& name, const glm::mat4& mat) {
 
 void Shader::setInt(const string& name, int value) {
     glUniform1i(glGetUniformLocation(program_id, name.c_str()), value);
+}
+
+void Shader::setVec4(const string& name, const glm::vec4& vec) {
+    glUniform4fv(glGetUniformLocation(program_id, name.c_str()), 1, glm::value_ptr(vec));
 }
 
 string Shader::readFile(const string& path) {

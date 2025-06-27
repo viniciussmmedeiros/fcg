@@ -17,7 +17,6 @@ class Game {
         void handleKeyCallback(int key, int scancode, int action, int mod);
         void handleMouseButton(int button, int action, int mod);
         void handleCursorPos(double xpos, double ypos);
-        void handleScroll(double xoffset, double yoffset);
 
     private:
         void init();
@@ -47,7 +46,12 @@ class Game {
         glm::vec3 cowPosition;
 
         // Ângulos de Euler que controlam a rotação de um dos cubos da cena virtual
-        // float bunnyAngleX = 0.0f;
-        // float bunnyAngleY = 0.0f;
-        // float bunnyAngleZ = 0.0f;
+        float bunnyAngleX = 0.0f;
+        float bunnyAngleY = 0.0f;
+        float bunnyAngleZ = 0.0f;
+
+        bool keyWPressed = false;
+        bool keyAPressed = false;
+        bool keySPressed = false;
+        bool keyDPressed = false;
 };

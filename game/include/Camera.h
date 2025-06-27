@@ -15,33 +15,38 @@ class Camera {
         bool getUseFreeCamera();
         glm::mat4 getProjectionMatrix(float screenRatio) const;
 
-        void setPerspective(bool usePerspective) { 
-            usePerspectiveProjection = usePerspective; 
-        }
-
         void setFreeCamera(bool useFreeCameraMode) {
             useFreeCamera = useFreeCameraMode;
         }
 
-        void setCameraPhi(float phi) {
-            cameraPhi = phi;
+        void setFreeCameraPosition(glm::vec4 position) {
+            freeCameraPosition = position;
         }
 
-        void setCameraTheta(float theta) {
-            cameraTheta = theta;
+        glm::vec4 getFreeCameraPosition() {
+            return freeCameraPosition;
         }
 
-        void setPosition(glm::vec3 position) {
-            // printf("\nESTAMOS AQUI!!\n");
-            m_position = glm::vec4(position, 1.0f);
-            // printf("\t\tm_position: %f, %f, %f, %f\n", m_position.x, m_position.y, m_position.z, m_position.w);
+        glm::vec4 getCameraViewVector() {
+            return camera_view_vector;
         }
 
     private:
-        glm::vec4 m_position;
-        float cameraTheta;
-        float cameraPhi;
-        float cameraDistance;
-        bool usePerspectiveProjection;
-        bool useFreeCamera;
+        void init();
+        
+        float lookatCameraTheta = 0.0f;
+        float lookatCameraPhi = 0.0f;
+        float lookatCameraDistance = 2.5f;
+
+        bool useFreeCamera = true;
+        
+        float freeCameraTheta = 4.141592f;
+        float freeCameraPhi = 0.0f;
+        float freeCameraDistance = 2.5f;
+        glm::vec4 freeCameraPosition = glm::vec4(2.0f, 1.0f, 2.0f, 1.0f);
+
+        float freeX = cos(freeCameraPhi) * sin(freeCameraTheta);
+        float freeY = -sin(freeCameraPhi);
+        float freeZ = cos(freeCameraPhi) * cos(freeCameraTheta);
+        glm::vec4 camera_view_vector = glm::vec4(freeX, freeY, freeZ, 0.0f);
 };

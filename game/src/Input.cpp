@@ -21,10 +21,3 @@ void Input::CursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
         game->handleCursorPos(xpos, ypos);
     }
 }
-
-void Input::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-    Game* game = static_cast<Game*>(glfwGetWindowUserPointer(window));
-    if (game) {
-        game->handleScroll(xoffset, yoffset);
-    }
-}

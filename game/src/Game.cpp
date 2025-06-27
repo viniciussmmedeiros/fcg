@@ -1,5 +1,9 @@
 #include "Game.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <memory>
+#include <stb_image.h>
 
 using namespace std;
 
@@ -18,7 +22,26 @@ void Game::init() {
     glfwSetKeyCallback(window.getNativeWindow(), Input::KeyCallback);
     glfwSetMouseButtonCallback(window.getNativeWindow(), Input::MouseButtonCallback);
     glfwSetCursorPosCallback(window.getNativeWindow(), Input::CursorPosCallback);
-    glfwSetScrollCallback(window.getNativeWindow(), Input::ScrollCallback);
+
+    cowPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    try {
+        shader.reset(new Shader("../../src/shader_vertex.glsl", "../../src/shader_fragment.glsl"));
+        texture = std::unique_ptr<Texture>(new Texture());
+
+        // texture->LoadTextureImage("../../data/tc-earth_daymap_surface.jpg", g_NumLoadedTextures);
+        // g_NumLoadedTextures += 1;
+        
+        texture->LoadTextureImage("../../data/cow_surface.jpg", g_NumLoadedTextures);
+        g_NumLoadedTextures += 1;
+    
+        models["sphere"].reset(new Model("../../data/sphere.obj"));
+        models["bunny"].reset(new Model("../../data/bunny.obj"));
+        models["plane"].reset(new Model("../../data/plane.obj"));
+        models["cow"].reset(new Model("../../data/cow.obj"));
+    } catch (exception& e) {
+        fprintf(stderr, "Error opening data resources \"%s\".\n", e.what());
+    }
 
     // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
     glEnable(GL_DEPTH_TEST);
@@ -27,29 +50,6 @@ void Game::init() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
-    // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
-    // definida como coeficientes RGBA: Red, Green, Blue, Alpha; isto é:
-    // Vermelho, Verde, Azul, Alpha (valor de transparência).
-    // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
-    //
-    //           R     G     B     A
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-    cowPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-
-    texture = std::unique_ptr<Texture>(new Texture());
-    texture->LoadTextureImage("../../data/cow_surface.jpg", g_NumLoadedTextures);
-    g_NumLoadedTextures += 1;
-
-    try {
-        shader.reset(new Shader("../../src/shader_vertex.glsl", "../../src/shader_fragment.glsl"));
-        // models["sphere"].reset(new Model("../../data/sphere.obj"));
-        // models["bunny"].reset(new Model("../../data/bunny.obj"));
-        // models["plane"].reset(new Model("../../data/plane.obj"));
-        models["cow"].reset(new Model("../../data/cow.obj"));
-    } catch (exception& e) {
-        fprintf(stderr, "Error opening data resources \"%s\".\n", e.what());
-    }
 }
 
 void Game::run() {
@@ -67,60 +67,56 @@ void Game::run() {
 }
 
 void Game::render() {
+    printf("\n[TESTES]\n\tT Y U I -> movimentam a câmera livre\n\tW A S D -> movimentam a vaca\n\tV -> troca entre câmera livre e look-at\n");
+    // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
+    // definida como coeficientes RGBA: Red, Green, Blue, Alpha; isto é:
+    // Vermelho, Verde, Azul, Alpha (valor de transparência).
+    // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
+    //
+    //           R     G     B     A
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
     // "Pintamos" todos os pixels do framebuffer com a cor definida acima,
     // e também resetamos todos os pixels do Z-buffer (depth buffer).
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    shader->use();
-
-    if(camera.getUseFreeCamera()) {
-        // glm::mat4 cowOrientation = Matrix_Rotate_Z(cowAngleZ) *
-        //                     Matrix_Rotate_Y(cowAngleY) *
-        //                     Matrix_Rotate_X(cowAngleX);
-
-        // glm::vec3 cowForward(1.0f, 0.0f, 0.0f);
-        // float cameraDistance = 2.0f;
-        // glm::vec3 cameraOffset = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
-        // glm::vec3 currFreePosition = cowPosition + cameraOffset * cameraDistance;
-
-        // float cameraHeight = 1.0f;
-        // currFreePosition += glm::vec3(0.0f, cameraHeight, 0.0f);
-
-        // camera.setPosition(currFreePosition);
-    }
     glm::mat4 viewMatrix = camera.getVirtualCamera();
-
     glm::mat4 projectionMatrix = camera.getProjectionMatrix(window.getScreenRatio());
 
+    shader->use();
     shader->setMat4("view", viewMatrix);
     shader->setMat4("projection", projectionMatrix);
-    
-    // Desenha a esfera
-    // glm::mat4 modelMatrix = Matrix_Translate(-1.0f, 0.0f, 0.0f);
-    // shader->setMat4("model", modelMatrix);
-    // shader->setInt("object_id", 0);
-    // models["sphere"]->draw();
+
+    // desenha a esfera
+    glm::mat4 modelMatrix = Matrix_Translate(-1.0f, 0.0f, 0.0f);
+    shader->setMat4("model", modelMatrix);
+    shader->setInt("object_id", 0);
+
+    GLint g_bbox_min_uniform = shader->getBBoxMinUniform();
+    GLint g_bbox_max_uniform = shader->getBBoxMaxUniform();
+    models["sphere"]->draw("the_sphere", g_bbox_min_uniform, g_bbox_max_uniform);
 
     // Desenha o coelho
-    // modelMatrix = Matrix_Translate(1.0f, 0.0f, 0.0f)
-    //             * Matrix_Rotate_Z(bunnyAngleZ)
-    //             * Matrix_Rotate_Y(bunnyAngleY)
-    //             * Matrix_Rotate_X(bunnyAngleX);
-    // shader->setMat4("model", modelMatrix);
-    // shader->setInt("object_id", 1);
-    // models["bunny"]->draw();
+    modelMatrix = Matrix_Translate(1.0f, 0.0f, 0.0f)
+                * Matrix_Rotate_Z(bunnyAngleZ)
+                * Matrix_Rotate_Y(bunnyAngleY)
+                * Matrix_Rotate_X(bunnyAngleX);
+    shader->setMat4("model", modelMatrix);
+    shader->setInt("object_id", 1);
+    models["bunny"]->draw("the_bunny", g_bbox_min_uniform, g_bbox_max_uniform);
 
     // Desenha o plano
-    // modelMatrix = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(2.0f, 1.0f, 2.0f);
-    // shader->setMat4("model", modelMatrix);
-    // shader->setInt("object_id", 2);
-    // models["plane"]->draw();
+    modelMatrix = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(2.0f, 1.0f, 2.0f);
+    shader->setMat4("model", modelMatrix);
+    shader->setInt("object_id", 2);
+    models["plane"]->draw("the_plane", g_bbox_min_uniform, g_bbox_max_uniform);
 
     // desenha a vaca
-    glm::mat4 modelMatrix = Matrix_Translate(cowPosition.x, cowPosition.y, cowPosition.z);
+    
+    modelMatrix = Matrix_Translate(cowPosition.x, cowPosition.y, cowPosition.z);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 3);
-    models["cow"]->draw();
+    models["cow"]->draw("the_cow", g_bbox_min_uniform, g_bbox_max_uniform);
 }
 
 void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
@@ -129,26 +125,9 @@ void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
         if (key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window.getNativeWindow(), true);
         }
-        // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
-        if (key == GLFW_KEY_P) {
-            camera.setPerspective(true);
-        }
-        // Se o usuário apertar a tecla O, utilizamos projeção ortográfica.
-        if (key == GLFW_KEY_O) {
-            camera.setPerspective(false);
-        }
         
         float delta = 3.141592 / 16.0f;
-        // if (key == GLFW_KEY_X) {
-        //     bunnyAngleX += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
-        // }
-        // if (key == GLFW_KEY_Y) {
-        //     bunnyAngleY += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
-        // }
-        // if (key == GLFW_KEY_Z) {
-        //     bunnyAngleZ += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
-        // }
-
+        
         glm::mat4 cowOrientation = Matrix_Rotate_Z(cowAngleZ) *
                                    Matrix_Rotate_Y(cowAngleY) *
                                    Matrix_Rotate_X(cowAngleX);
@@ -158,26 +137,6 @@ void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
 
         if (key == GLFW_KEY_V) {
             camera.setFreeCamera(!camera.getUseFreeCamera());
-
-            if(camera.getUseFreeCamera()) {
-                // float cameraDistance = 2.0f;
-                // glm::vec3 cameraOffset = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
-                // glm::vec3 currFreePosition = cowPosition + cameraOffset * cameraDistance;
-
-                // float altura = 1.0f;
-                // currFreePosition += glm::vec3(0.0f, altura, 0.0f);
-
-                // glm::vec3 toCow = glm::normalize(cowPosition - currFreePosition);
-                // float theta = atan2(toCow.x, toCow.z);
-                // float phi = -asin(toCow.y);
-
-                // camera.setCameraTheta(theta);
-                // camera.setCameraPhi(phi);
-
-                camera.setCameraPhi(0);
-                camera.setCameraTheta(4.141592f);
-                // camera.setPosition(cowPosition);
-            }
         }
 
         if (key == GLFW_KEY_W) {
@@ -195,6 +154,29 @@ void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
         if (key == GLFW_KEY_D) {
             glm::vec3 rightVec = glm::vec3(cowOrientation * glm::vec4(cowRight, 0.0f));
             cowPosition += rightVec * 0.1f;
+        }
+
+        float speed = 0.85f;
+        glm::vec4 vector_u = crossproduct(glm::vec4(0.0f,1.0f,0.0f,0.0f), camera.getCameraViewVector());
+        vector_u = normalize(vector_u);
+        if(key == GLFW_KEY_T) {
+            glm::vec4 new_camera_position = camera.getFreeCameraPosition() += speed * camera.getCameraViewVector();
+            camera.setFreeCameraPosition(new_camera_position);
+        }
+        
+        if(key == GLFW_KEY_Y) {
+            glm::vec4 new_camera_position = camera.getFreeCameraPosition() -= speed * camera.getCameraViewVector();
+            camera.setFreeCameraPosition(new_camera_position);
+        }
+
+        if(key == GLFW_KEY_U) {
+            glm::vec4 new_camera_position = camera.getFreeCameraPosition() += speed * vector_u;
+            camera.setFreeCameraPosition(new_camera_position);
+        }
+
+        if(key == GLFW_KEY_I) {
+            glm::vec4 new_camera_position = camera.getFreeCameraPosition() -= speed * vector_u;
+            camera.setFreeCameraPosition(new_camera_position);
         }
     }
 }
@@ -232,11 +214,3 @@ void Game::handleCursorPos(double xpos, double ypos) {
         lastCursorPosY = ypos;
     }
 }
-
-void Game::handleScroll(double xoffset, double yoffset) {
-    camera.scrollCallback(yoffset);
-}
-
-// glm::vec4 getFreeCameraPosition() {
-    
-// }

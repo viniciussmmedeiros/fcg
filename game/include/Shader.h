@@ -11,9 +11,14 @@ public:
     void use() const;
     void setMat4(const std::string& name, const glm::mat4& mat);
     void setInt(const std::string& name, int value);
+    void setVec4(const std::string& name, const glm::vec4& vec);
 
+    GLint getBBoxMinUniform() const;
+    GLint getBBoxMaxUniform() const;
 private:
     GLuint program_id;
+    mutable GLint g_bbox_min_uniform;
+    mutable GLint g_bbox_max_uniform;
     static std::string readFile(const std::string& path);
     static GLuint compileShader(const std::string& source, GLenum type);
 };
