@@ -13,10 +13,6 @@ class Texture {
         GLuint samplerId;
         GLuint textureUnit;
     public:
-        Texture();
-        ~Texture();
-        
-        
         void LoadTextureImage(const char* filename, const GLuint numLoadedTextures); // Função que carrega imagens de textura
         
         GLuint getTextureId() const;

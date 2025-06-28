@@ -25,7 +25,8 @@ class Game {
         Window window;
         Camera camera;
         std::unique_ptr<Shader> shader;
-        std::unique_ptr<Texture> texture;
+        
+        std::map<std::string, std::unique_ptr<Texture>> textures;
         std::map<std::string, std::unique_ptr<Model>> models;
 
         // Se o usuário pressionou o botão esquerdo do mouse, guardamos a

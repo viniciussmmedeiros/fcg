@@ -27,14 +27,14 @@ void Game::init() {
 
     try {
         shader.reset(new Shader("../../src/shader_vertex.glsl", "../../src/shader_fragment.glsl"));
-        texture = std::unique_ptr<Texture>(new Texture());
 
-        // texture->LoadTextureImage("../../data/tc-earth_daymap_surface.jpg", g_NumLoadedTextures);
-        // g_NumLoadedTextures += 1;
-        
-        texture->LoadTextureImage("../../data/cow_surface.jpg", g_NumLoadedTextures);
-        g_NumLoadedTextures += 1;
-    
+        textures["earth"] = std::unique_ptr<Texture>(new Texture());
+        textures["earth"]->LoadTextureImage("../../data/tc-earth_daymap_surface.jpg", g_NumLoadedTextures++);
+        textures["cow"] = std::unique_ptr<Texture>(new Texture());
+        textures["cow"]->LoadTextureImage("../../data/cow_surface.jpg", g_NumLoadedTextures++);
+        textures["bunny"] = std::unique_ptr<Texture>(new Texture());
+        textures["bunny"]->LoadTextureImage("../../data/bunny_surface.jpg", g_NumLoadedTextures);
+
         models["sphere"].reset(new Model("../../data/sphere.obj"));
         models["bunny"].reset(new Model("../../data/bunny.obj"));
         models["plane"].reset(new Model("../../data/plane.obj"));
@@ -87,16 +87,21 @@ void Game::render() {
     shader->setMat4("view", viewMatrix);
     shader->setMat4("projection", projectionMatrix);
 
+    GLint g_bbox_min_uniform = shader->getBBoxMinUniform();
+    GLint g_bbox_max_uniform = shader->getBBoxMaxUniform();
+
     // desenha a esfera
+    textures["earth"]->bind();
+    shader->setInt("TextureImage0", textures["earth"]->getTextureUnit());
     glm::mat4 modelMatrix = Matrix_Translate(-1.0f, 0.0f, 0.0f);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 0);
-
-    GLint g_bbox_min_uniform = shader->getBBoxMinUniform();
-    GLint g_bbox_max_uniform = shader->getBBoxMaxUniform();
     models["sphere"]->draw("the_sphere", g_bbox_min_uniform, g_bbox_max_uniform);
+    textures["earth"]->unbind();
 
     // Desenha o coelho
+    textures["bunny"]->bind();
+    shader->setInt("TextureImage0", textures["bunny"]->getTextureUnit());
     modelMatrix = Matrix_Translate(1.0f, 0.0f, 0.0f)
                 * Matrix_Rotate_Z(bunnyAngleZ)
                 * Matrix_Rotate_Y(bunnyAngleY)
@@ -104,19 +109,25 @@ void Game::render() {
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 1);
     models["bunny"]->draw("the_bunny", g_bbox_min_uniform, g_bbox_max_uniform);
+    textures["bunny"]->unbind();
 
     // Desenha o plano
+    textures["earth"]->bind();
+    shader->setInt("TextureImage0", textures["earth"]->getTextureUnit());
     modelMatrix = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(2.0f, 1.0f, 2.0f);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 2);
     models["plane"]->draw("the_plane", g_bbox_min_uniform, g_bbox_max_uniform);
+    textures["earth"]->unbind();
 
     // desenha a vaca
-    
+    textures["cow"]->bind();
+    shader->setInt("TextureImage0", textures["cow"]->getTextureUnit());
     modelMatrix = Matrix_Translate(cowPosition.x, cowPosition.y, cowPosition.z);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 3);
     models["cow"]->draw("the_cow", g_bbox_min_uniform, g_bbox_max_uniform);
+    textures["cow"]->unbind();
 }
 
 void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
