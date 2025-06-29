@@ -195,11 +195,32 @@ void Game::render() {
     shader->setInt("TextureImage0", textures["ceiling"]->getTextureUnit());
     modelMatrix = Matrix_Translate(0.0f, ceilingHeight - 1.0f, 0.0f) 
                 * Matrix_Scale(roomSize, ceilingThickness, roomSize);
-
     shader->setMat4("model", modelMatrix);
-    shader->setInt("object_id", 2);
+    shader->setInt("object_id", 6);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["ceiling"]->unbind();
+
+    // Lista de posições para caixas na cena
+    std::vector<glm::vec3> boxPositions = {
+        glm::vec3(2.0f, -0.4f, 2.0f),
+        glm::vec3(-2.0f, -0.4f, -2.0f),
+        glm::vec3(1.0f, -0.4f, -3.0f)
+    };
+
+    float boxSize = 1.0f;  // Tamanho uniforme das caixas
+
+    for (size_t i = 0; i < boxPositions.size(); ++i) {
+        // TODO: Ajustar textura
+        textures["floor"]->bind();
+        shader->setInt("TextureImage0", textures["floor"]->getTextureUnit());
+        modelMatrix = Matrix_Translate(boxPositions[i].x, boxPositions[i].y, boxPositions[i].z) 
+                    * Matrix_Scale(boxSize, boxSize, boxSize);
+
+        shader->setMat4("model", modelMatrix);
+        shader->setInt("object_id", 2);  // Mesmo ID das paredes por enquanto
+        models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
+        textures["ceiling"]->unbind();
+    }
 }
 
 void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
