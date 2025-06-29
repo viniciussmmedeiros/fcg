@@ -39,6 +39,7 @@ void Game::init() {
         models["bunny"].reset(new Model("../../data/bunny.obj"));
         models["plane"].reset(new Model("../../data/plane.obj"));
         models["cow"].reset(new Model("../../data/cow.obj"));
+        models["cube"].reset(new Model("../../data/cube.obj"));
     } catch (exception& e) {
         fprintf(stderr, "Error opening data resources \"%s\".\n", e.what());
     }
@@ -100,25 +101,25 @@ void Game::render() {
     textures["earth"]->unbind();
 
     // Desenha o coelho
-    textures["bunny"]->bind();
-    shader->setInt("TextureImage0", textures["bunny"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(1.0f, 0.0f, 0.0f)
-                * Matrix_Rotate_Z(bunnyAngleZ)
-                * Matrix_Rotate_Y(bunnyAngleY)
-                * Matrix_Rotate_X(bunnyAngleX);
-    shader->setMat4("model", modelMatrix);
-    shader->setInt("object_id", 1);
-    models["bunny"]->draw("the_bunny", g_bbox_min_uniform, g_bbox_max_uniform);
-    textures["bunny"]->unbind();
+    // textures["bunny"]->bind();
+    // shader->setInt("TextureImage0", textures["bunny"]->getTextureUnit());
+    // modelMatrix = Matrix_Translate(1.0f, 0.0f, 0.0f)
+    //             * Matrix_Rotate_Z(bunnyAngleZ)
+    //             * Matrix_Rotate_Y(bunnyAngleY)
+    //             * Matrix_Rotate_X(bunnyAngleX);
+    // shader->setMat4("model", modelMatrix);
+    // shader->setInt("object_id", 1);
+    // models["bunny"]->draw("the_bunny", g_bbox_min_uniform, g_bbox_max_uniform);
+    // textures["bunny"]->unbind();
 
     // Desenha o plano
-    textures["earth"]->bind();
-    shader->setInt("TextureImage0", textures["earth"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(2.0f, 1.0f, 2.0f);
-    shader->setMat4("model", modelMatrix);
-    shader->setInt("object_id", 2);
-    models["plane"]->draw("the_plane", g_bbox_min_uniform, g_bbox_max_uniform);
-    textures["earth"]->unbind();
+    // textures["earth"]->bind();
+    // shader->setInt("TextureImage0", textures["earth"]->getTextureUnit());
+    // modelMatrix = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(2.0f, 1.0f, 2.0f);
+    // shader->setMat4("model", modelMatrix);
+    // shader->setInt("object_id", 2);
+    // models["plane"]->draw("the_plane", g_bbox_min_uniform, g_bbox_max_uniform);
+    // textures["earth"]->unbind();
 
     // desenha a vaca
     textures["cow"]->bind();
@@ -128,6 +129,52 @@ void Game::render() {
     shader->setInt("object_id", 3);
     models["cow"]->draw("the_cow", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["cow"]->unbind();
+
+    modelMatrix = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(5.0f, 0.1f, 5.0f);
+    shader->setMat4("model", modelMatrix);
+    shader->setInt("object_id", 2);
+    models["plane"]->draw("the_plane", g_bbox_min_uniform, g_bbox_max_uniform);
+
+    float wallThickness = 0.2f;
+    float wallHeight = 3.0f;
+    float roomSize = 5.0f;
+
+    // Parede esquerda
+    modelMatrix = Matrix_Translate(-roomSize / 2.0f, wallHeight / 2.0f - 1.0f, 0.0f) 
+            * Matrix_Scale(wallThickness, wallHeight, roomSize);
+    shader->setMat4("model", modelMatrix);
+    shader->setInt("object_id", 2);
+    models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
+
+    // Parede direita
+    modelMatrix = Matrix_Translate(roomSize / 2.0f, wallHeight / 2.0f - 1.0f, 0.0f) 
+        * Matrix_Scale(wallThickness, wallHeight, roomSize);
+    shader->setMat4("model", modelMatrix);
+    shader->setInt("object_id", 2);
+    models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
+
+    // Parede frontal
+    modelMatrix = Matrix_Translate(0.0f, wallHeight / 2.0f - 1.0f, -roomSize / 2.0f) * Matrix_Scale(roomSize, wallHeight, wallThickness);
+    shader->setMat4("model", modelMatrix);
+    shader->setInt("object_id", 1);
+    models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
+
+    // Parede de trás
+    modelMatrix = Matrix_Translate(0.0f, wallHeight / 2.0f - 1.0f, roomSize / 2.0f) * Matrix_Scale(roomSize, wallHeight, wallThickness);
+    shader->setMat4("model", modelMatrix);
+    shader->setInt("object_id", 1);
+    models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
+
+    // Teto
+    float ceilingHeight = 3.0f;  // altura do teto (mesma que parede)
+    float ceilingThickness = 0.1f;  // espessura fina para o teto
+
+    modelMatrix = Matrix_Translate(0.0f, ceilingHeight - 1.0f, 0.0f) 
+                * Matrix_Scale(roomSize, ceilingThickness, roomSize);
+
+    shader->setMat4("model", modelMatrix);
+    shader->setInt("object_id", 2);
+    models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
 }
 
 void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
