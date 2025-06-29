@@ -33,7 +33,13 @@ void Game::init() {
         textures["cow"] = std::unique_ptr<Texture>(new Texture());
         textures["cow"]->LoadTextureImage("../../data/cow_surface.jpg", g_NumLoadedTextures++);
         textures["bunny"] = std::unique_ptr<Texture>(new Texture());
-        textures["bunny"]->LoadTextureImage("../../data/bunny_surface.jpg", g_NumLoadedTextures);
+        textures["bunny"]->LoadTextureImage("../../data/bunny_surface.jpg", g_NumLoadedTextures++);
+        textures["ceiling"] = std::unique_ptr<Texture>(new Texture());
+        textures["ceiling"]->LoadTextureImage("../../data/ceiling_surface.jpg", g_NumLoadedTextures++);
+        textures["floor"] = std::unique_ptr<Texture>(new Texture());
+        textures["floor"]->LoadTextureImage("../../data/floor_surface.jpg", g_NumLoadedTextures++);
+        textures["wall"] = std::unique_ptr<Texture>(new Texture());
+        textures["wall"]->LoadTextureImage("../../data/wall_surface.jpg", g_NumLoadedTextures);
 
         models["sphere"].reset(new Model("../../data/sphere.obj"));
         models["bunny"].reset(new Model("../../data/bunny.obj"));
@@ -130,51 +136,70 @@ void Game::render() {
     models["cow"]->draw("the_cow", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["cow"]->unbind();
 
+    // Desenha o chão
+    textures["floor"]->bind();
+    shader->setInt("TextureImage0", textures["floor"]->getTextureUnit());
     modelMatrix = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(5.0f, 0.1f, 5.0f);
     shader->setMat4("model", modelMatrix);
-    shader->setInt("object_id", 2);
+    shader->setInt("object_id", 4);
     models["plane"]->draw("the_plane", g_bbox_min_uniform, g_bbox_max_uniform);
+    textures["floor"]->unbind();
 
     float wallThickness = 0.2f;
     float wallHeight = 3.0f;
-    float roomSize = 5.0f;
+    float roomSize = 10.0f;
 
     // Parede esquerda
+    textures["wall"]->bind();
+    shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
     modelMatrix = Matrix_Translate(-roomSize / 2.0f, wallHeight / 2.0f - 1.0f, 0.0f) 
             * Matrix_Scale(wallThickness, wallHeight, roomSize);
     shader->setMat4("model", modelMatrix);
-    shader->setInt("object_id", 2);
+    shader->setInt("object_id", 5);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
+    textures["wall"]->unbind();
 
     // Parede direita
+    textures["wall"]->bind();
+    shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
     modelMatrix = Matrix_Translate(roomSize / 2.0f, wallHeight / 2.0f - 1.0f, 0.0f) 
         * Matrix_Scale(wallThickness, wallHeight, roomSize);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 2);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
+    textures["wall"]->unbind();
 
     // Parede frontal
+    textures["wall"]->bind();
+    shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
     modelMatrix = Matrix_Translate(0.0f, wallHeight / 2.0f - 1.0f, -roomSize / 2.0f) * Matrix_Scale(roomSize, wallHeight, wallThickness);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 1);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
+    textures["wall"]->unbind();
 
     // Parede de trás
+    textures["wall"]->bind();
+    shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
     modelMatrix = Matrix_Translate(0.0f, wallHeight / 2.0f - 1.0f, roomSize / 2.0f) * Matrix_Scale(roomSize, wallHeight, wallThickness);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 1);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
+    textures["wall"]->unbind();
 
     // Teto
     float ceilingHeight = 3.0f;  // altura do teto (mesma que parede)
     float ceilingThickness = 0.1f;  // espessura fina para o teto
 
+    textures["ceiling"]->bind();
+    shader->setInt("TextureImage0", textures["ceiling"]->getTextureUnit());
     modelMatrix = Matrix_Translate(0.0f, ceilingHeight - 1.0f, 0.0f) 
                 * Matrix_Scale(roomSize, ceilingThickness, roomSize);
 
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 2);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
+    textures["ceiling"]->unbind();
 }
 
 void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
