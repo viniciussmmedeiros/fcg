@@ -67,6 +67,9 @@ void Game::run() {
         float deltaT = currentFrameT - lastFrameT;
         // usar deltaT para fazer as atualizações no jogo, animações etc
         lastFrameT = currentFrameT;
+
+        processCowMovement(deltaT);
+
         render();
         window.swapBuffers(); // atualiza a tela
         glfwPollEvents(); // processa eventos tipo input
@@ -231,100 +234,11 @@ void Game::render() {
 
 void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
     if (action == GLFW_PRESS) {
-        // Se o usuário pressionar a tecla ESC, fechamos a janela.
-        if (key == GLFW_KEY_ESCAPE) {
-            glfwSetWindowShouldClose(window.getNativeWindow(), true);
-        }
-        
-        float delta = 3.141592 / 16.0f;
-        
-        glm::mat4 cowOrientation = Matrix_Rotate_Z(cowAngleZ) *
-                                   Matrix_Rotate_Y(cowAngleY) *
-                                   Matrix_Rotate_X(cowAngleX);
+        keyPressed[key] = true;
+    }
 
-        glm::vec3 cowForward(1.0f, 0.0f, 0.0f); // +x é para frente
-        glm::vec3 cowRight(0.0f, 0.0f, 1.0f); // +z é direita
-
-        if (key == GLFW_KEY_V) {
-            camera.setFreeCamera(!camera.getUseFreeCamera());
-        }
-
-        if (key == GLFW_KEY_W) {
-            glm::vec3 forwardVec = glm::vec3(cowOrientation * glm::vec4(cowForward, 0.0f));
-            glm::vec3 newPos = cowPosition + forwardVec * 0.1f;
-        
-            Collisions::AABB newCow = {
-                newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
-                newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
-            };
-        
-            if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
-                cowPosition = newPos;
-            }
-        }
-
-        if (key == GLFW_KEY_S) {
-            glm::vec3 backwardVec = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
-            glm::vec3 newPos = cowPosition + backwardVec * 0.1f;
-            
-            Collisions::AABB newCow = {
-                newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
-                newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
-            };
-
-            if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
-                cowPosition = newPos;
-            }
-        }
-
-        if (key == GLFW_KEY_A) {
-            glm::vec3 leftVec = glm::vec3(cowOrientation * glm::vec4(-cowRight, 0.0f));
-            glm::vec3 newPos = cowPosition + leftVec * 0.1f;
-            Collisions::AABB newCow = {
-                newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
-                newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
-            };
-
-            if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
-                cowPosition = newPos;
-            }
-        }
-
-        if (key == GLFW_KEY_D) {
-            glm::vec3 rightVec = glm::vec3(cowOrientation * glm::vec4(cowRight, 0.0f));
-            glm::vec3 newPos = cowPosition + rightVec * 0.1f;
-            Collisions::AABB newCow = {
-                newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
-                newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
-            };
-            
-            if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
-                cowPosition = newPos;
-            }
-        }
-
-        float speed = 0.85f;
-        glm::vec4 vector_u = crossproduct(glm::vec4(0.0f,1.0f,0.0f,0.0f), camera.getCameraViewVector());
-        vector_u = normalize(vector_u);
-        if(key == GLFW_KEY_T) {
-            glm::vec4 new_camera_position = camera.getFreeCameraPosition() += speed * camera.getCameraViewVector();
-            camera.setFreeCameraPosition(new_camera_position);
-        }
-        
-        if(key == GLFW_KEY_Y) {
-            glm::vec4 new_camera_position = camera.getFreeCameraPosition() -= speed * camera.getCameraViewVector();
-            camera.setFreeCameraPosition(new_camera_position);
-        }
-
-        if(key == GLFW_KEY_U) {
-            glm::vec4 new_camera_position = camera.getFreeCameraPosition() += speed * vector_u;
-            camera.setFreeCameraPosition(new_camera_position);
-        }
-
-        if(key == GLFW_KEY_I) {
-            glm::vec4 new_camera_position = camera.getFreeCameraPosition() -= speed * vector_u;
-            camera.setFreeCameraPosition(new_camera_position);
-        }
+    if (action == GLFW_RELEASE) {
+        keyPressed[key] = false;
     }
 }
 
@@ -359,5 +273,104 @@ void Game::handleCursorPos(double xpos, double ypos) {
         // cursor como sendo a última posição conhecida do cursor.
         lastCursorPosX = xpos;
         lastCursorPosY = ypos;
+    }
+}
+
+void Game::processCowMovement(float deltaTime) {
+    if (keyPressed[GLFW_KEY_ESCAPE]) {
+        glfwSetWindowShouldClose(window.getNativeWindow(), true);
+    }
+    
+    float delta = 3.141592 / 16.0f;
+    
+    glm::mat4 cowOrientation = Matrix_Rotate_Z(cowAngleZ) *
+                               Matrix_Rotate_Y(cowAngleY) *
+                               Matrix_Rotate_X(cowAngleX);
+
+    glm::vec3 cowForward(1.0f, 0.0f, 0.0f); // +x é para frente
+    glm::vec3 cowRight(0.0f, 0.0f, 1.0f); // +z é direita
+
+    if (keyPressed[GLFW_KEY_V]) {
+        camera.setFreeCamera(!camera.getUseFreeCamera());
+    }
+
+    float speed_cow = 0.01f;
+
+    if (keyPressed[GLFW_KEY_W]) {
+        glm::vec3 forwardVec = glm::vec3(cowOrientation * glm::vec4(cowForward, 0.0f));
+        glm::vec3 newPos = cowPosition + forwardVec * speed_cow;
+    
+        Collisions::AABB newCow = {
+            newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
+            newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
+        };
+    
+        if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+            cowPosition = newPos;
+        }
+    }
+
+    if (keyPressed[GLFW_KEY_S]) {
+        glm::vec3 backwardVec = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
+        glm::vec3 newPos = cowPosition + backwardVec * speed_cow;
+        
+        Collisions::AABB newCow = {
+            newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
+            newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
+        };
+
+        if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+            cowPosition = newPos;
+        }
+    }
+
+    if (keyPressed[GLFW_KEY_A]) {
+        glm::vec3 leftVec = glm::vec3(cowOrientation * glm::vec4(-cowRight, 0.0f));
+        glm::vec3 newPos = cowPosition + leftVec * speed_cow;
+        Collisions::AABB newCow = {
+            newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
+            newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
+        };
+
+        if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+            cowPosition = newPos;
+        }
+    }
+
+    if (keyPressed[GLFW_KEY_D]) {
+        glm::vec3 rightVec = glm::vec3(cowOrientation * glm::vec4(cowRight, 0.0f));
+        glm::vec3 newPos = cowPosition + rightVec * speed_cow;
+        Collisions::AABB newCow = {
+            newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
+            newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
+        };
+
+        if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+            cowPosition = newPos;
+        }
+    }
+
+    float speed = 0.01f;
+    glm::vec4 vector_u = crossproduct(glm::vec4(0.0f,1.0f,0.0f,0.0f), camera.getCameraViewVector());
+    vector_u = normalize(vector_u);
+
+    if(keyPressed[GLFW_KEY_T]) {
+        glm::vec4 new_camera_position = camera.getFreeCameraPosition() += speed * camera.getCameraViewVector();
+        camera.setFreeCameraPosition(new_camera_position);
+    }
+    
+    if(keyPressed[GLFW_KEY_Y]) {
+        glm::vec4 new_camera_position = camera.getFreeCameraPosition() -= speed * camera.getCameraViewVector();
+        camera.setFreeCameraPosition(new_camera_position);
+    }
+
+    if(keyPressed[GLFW_KEY_U]) {
+        glm::vec4 new_camera_position = camera.getFreeCameraPosition() += speed * vector_u;
+        camera.setFreeCameraPosition(new_camera_position);
+    }
+
+    if(keyPressed[GLFW_KEY_I]) {
+        glm::vec4 new_camera_position = camera.getFreeCameraPosition() -= speed * vector_u;
+        camera.setFreeCameraPosition(new_camera_position);
     }
 }

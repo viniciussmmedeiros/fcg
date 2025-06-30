@@ -18,6 +18,7 @@ class Game {
         void handleKeyCallback(int key, int scancode, int action, int mod);
         void handleMouseButton(int button, int action, int mod);
         void handleCursorPos(double xpos, double ypos);
+        void processCowMovement(float deltaTime);
 
     private:
         void init();
@@ -58,4 +59,6 @@ class Game {
         bool keyDPressed = false;
 
         std::vector<Collisions::AABB> worldObstacles;
+
+        bool keyPressed[1024] = {false};
 };
