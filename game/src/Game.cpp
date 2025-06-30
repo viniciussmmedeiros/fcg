@@ -106,27 +106,6 @@ void Game::render() {
     models["sphere"]->draw("the_sphere", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["earth"]->unbind();
 
-    // Desenha o coelho
-    // textures["bunny"]->bind();
-    // shader->setInt("TextureImage0", textures["bunny"]->getTextureUnit());
-    // modelMatrix = Matrix_Translate(1.0f, 0.0f, 0.0f)
-    //             * Matrix_Rotate_Z(bunnyAngleZ)
-    //             * Matrix_Rotate_Y(bunnyAngleY)
-    //             * Matrix_Rotate_X(bunnyAngleX);
-    // shader->setMat4("model", modelMatrix);
-    // shader->setInt("object_id", 1);
-    // models["bunny"]->draw("the_bunny", g_bbox_min_uniform, g_bbox_max_uniform);
-    // textures["bunny"]->unbind();
-
-    // Desenha o plano
-    // textures["earth"]->bind();
-    // shader->setInt("TextureImage0", textures["earth"]->getTextureUnit());
-    // modelMatrix = Matrix_Translate(0.0f, -1.0f, 0.0f) * Matrix_Scale(2.0f, 1.0f, 2.0f);
-    // shader->setMat4("model", modelMatrix);
-    // shader->setInt("object_id", 2);
-    // models["plane"]->draw("the_plane", g_bbox_min_uniform, g_bbox_max_uniform);
-    // textures["earth"]->unbind();
-
     // desenha a vaca
     textures["cow"]->bind();
     shader->setInt("TextureImage0", textures["cow"]->getTextureUnit());
@@ -159,6 +138,11 @@ void Game::render() {
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["wall"]->unbind();
 
+    worldObstacles.push_back({
+        glm::vec3(-roomSize/2.0f - wallThickness/2.0f, -1.0f, -roomSize/2.0f),
+        glm::vec3(-roomSize/2.0f + wallThickness/2.0f, wallHeight-1.0f, roomSize/2.0f)
+    });
+
     // Parede direita
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
@@ -169,6 +153,11 @@ void Game::render() {
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["wall"]->unbind();
 
+    worldObstacles.push_back({
+        glm::vec3(roomSize/2.0f - wallThickness/2.0f, -1.0f, -roomSize/2.0f),
+        glm::vec3(roomSize/2.0f + wallThickness/2.0f, wallHeight-1.0f, roomSize/2.0f)
+    });
+
     // Parede frontal
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
@@ -178,6 +167,11 @@ void Game::render() {
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["wall"]->unbind();
 
+    worldObstacles.push_back({
+        glm::vec3(-roomSize/2.0f, -1.0f, -roomSize/2.0f - wallThickness/2.0f),
+        glm::vec3(roomSize/2.0f, wallHeight-1.0f, -roomSize/2.0f + wallThickness/2.0f)
+    });
+
     // Parede de trás
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
@@ -186,6 +180,11 @@ void Game::render() {
     shader->setInt("object_id", 1);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["wall"]->unbind();
+
+    worldObstacles.push_back({
+        glm::vec3(-roomSize/2.0f, -1.0f, roomSize/2.0f - wallThickness/2.0f),
+        glm::vec3(roomSize/2.0f, wallHeight-1.0f, roomSize/2.0f + wallThickness/2.0f)
+    });
 
     // Teto
     float ceilingHeight = 3.0f;  // altura do teto (mesma que parede)
@@ -221,6 +220,13 @@ void Game::render() {
         models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
         textures["ceiling"]->unbind();
     }
+
+    for (const auto& pos : boxPositions) {
+        worldObstacles.push_back({
+            pos + glm::vec3(-boxSize/2.0f, 0.0f, -boxSize/2.0f),
+            pos + glm::vec3(boxSize/2.0f, boxSize, boxSize/2.0f)
+        });
+    }
 }
 
 void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
@@ -245,19 +251,56 @@ void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
 
         if (key == GLFW_KEY_W) {
             glm::vec3 forwardVec = glm::vec3(cowOrientation * glm::vec4(cowForward, 0.0f));
-            cowPosition += forwardVec * 0.1f;
+            glm::vec3 newPos = cowPosition + forwardVec * 0.1f;
+        
+            Collisions::AABB newCow = {
+                newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
+                newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
+            };
+        
+            if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+                cowPosition = newPos;
+            }
         }
+
         if (key == GLFW_KEY_S) {
             glm::vec3 backwardVec = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
-            cowPosition += backwardVec * 0.1f;
+            glm::vec3 newPos = cowPosition + backwardVec * 0.1f;
+            
+            Collisions::AABB newCow = {
+                newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
+                newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
+            };
+
+            if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+                cowPosition = newPos;
+            }
         }
+
         if (key == GLFW_KEY_A) {
             glm::vec3 leftVec = glm::vec3(cowOrientation * glm::vec4(-cowRight, 0.0f));
-            cowPosition += leftVec * 0.1f;
+            glm::vec3 newPos = cowPosition + leftVec * 0.1f;
+            Collisions::AABB newCow = {
+                newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
+                newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
+            };
+
+            if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+                cowPosition = newPos;
+            }
         }
+
         if (key == GLFW_KEY_D) {
             glm::vec3 rightVec = glm::vec3(cowOrientation * glm::vec4(cowRight, 0.0f));
-            cowPosition += rightVec * 0.1f;
+            glm::vec3 newPos = cowPosition + rightVec * 0.1f;
+            Collisions::AABB newCow = {
+                newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
+                newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
+            };
+            
+            if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+                cowPosition = newPos;
+            }
         }
 
         float speed = 0.85f;

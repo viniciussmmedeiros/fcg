@@ -5,6 +5,7 @@
 #include "Model.h"
 #include "Input.h"
 #include "Texture.h"
+#include "Collisions.h"
 #include <memory>
 #include <map>
 
@@ -55,4 +56,6 @@ class Game {
         bool keyAPressed = false;
         bool keySPressed = false;
         bool keyDPressed = false;
+
+        std::vector<Collisions::AABB> worldObstacles;
 };
