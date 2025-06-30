@@ -354,23 +354,57 @@ void Game::processCowMovement(float deltaTime) {
     glm::vec4 vector_u = crossproduct(glm::vec4(0.0f,1.0f,0.0f,0.0f), camera.getCameraViewVector());
     vector_u = normalize(vector_u);
 
-    if(keyPressed[GLFW_KEY_T]) {
-        glm::vec4 new_camera_position = camera.getFreeCameraPosition() += speed * camera.getCameraViewVector();
-        camera.setFreeCameraPosition(new_camera_position);
-    }
-    
-    if(keyPressed[GLFW_KEY_Y]) {
-        glm::vec4 new_camera_position = camera.getFreeCameraPosition() -= speed * camera.getCameraViewVector();
-        camera.setFreeCameraPosition(new_camera_position);
+    // Bounding box da câmera (em relação à posição)
+    glm::vec3 cameraBoxMin = glm::vec3(-0.2f, 0.0f, -0.2f);
+    glm::vec3 cameraBoxMax = glm::vec3( 0.2f, 1.7f,  0.2f);
+
+    glm::vec4 currentCameraPos = camera.getFreeCameraPosition();
+
+    if (keyPressed[GLFW_KEY_T]) {
+        glm::vec4 newCameraPos = currentCameraPos + speed * camera.getCameraViewVector();
+        Collisions::AABB cameraBox = {
+            glm::vec3(newCameraPos) + cameraBoxMin,
+            glm::vec3(newCameraPos) + cameraBoxMax
+        };
+
+        if (!Collisions::CheckCowCollisionWithWorld(cameraBox, worldObstacles)) {
+            camera.setFreeCameraPosition(newCameraPos);
+        }
     }
 
-    if(keyPressed[GLFW_KEY_U]) {
-        glm::vec4 new_camera_position = camera.getFreeCameraPosition() += speed * vector_u;
-        camera.setFreeCameraPosition(new_camera_position);
+    if (keyPressed[GLFW_KEY_Y]) {
+        glm::vec4 newCameraPos = currentCameraPos - speed * camera.getCameraViewVector();
+        Collisions::AABB cameraBox = {
+            glm::vec3(newCameraPos) + cameraBoxMin,
+            glm::vec3(newCameraPos) + cameraBoxMax
+        };
+
+        if (!Collisions::CheckCowCollisionWithWorld(cameraBox, worldObstacles)) {
+            camera.setFreeCameraPosition(newCameraPos);
+        }
     }
 
-    if(keyPressed[GLFW_KEY_I]) {
-        glm::vec4 new_camera_position = camera.getFreeCameraPosition() -= speed * vector_u;
-        camera.setFreeCameraPosition(new_camera_position);
+    if (keyPressed[GLFW_KEY_U]) {
+        glm::vec4 newCameraPos = currentCameraPos + speed * vector_u;
+        Collisions::AABB cameraBox = {
+            glm::vec3(newCameraPos) + cameraBoxMin,
+            glm::vec3(newCameraPos) + cameraBoxMax
+        };
+
+        if (!Collisions::CheckCowCollisionWithWorld(cameraBox, worldObstacles)) {
+            camera.setFreeCameraPosition(newCameraPos);
+        }
+    }
+
+    if (keyPressed[GLFW_KEY_I]) {
+        glm::vec4 newCameraPos = currentCameraPos - speed * vector_u;
+        Collisions::AABB cameraBox = {
+            glm::vec3(newCameraPos) + cameraBoxMin,
+            glm::vec3(newCameraPos) + cameraBoxMax
+        };
+
+        if (!Collisions::CheckCowCollisionWithWorld(cameraBox, worldObstacles)) {
+            camera.setFreeCameraPosition(newCameraPos);
+        }
     }
 }
