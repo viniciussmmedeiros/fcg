@@ -39,7 +39,9 @@ void Game::init() {
         textures["floor"] = std::unique_ptr<Texture>(new Texture());
         textures["floor"]->LoadTextureImage("../../data/floor_surface.jpg", g_NumLoadedTextures++);
         textures["wall"] = std::unique_ptr<Texture>(new Texture());
-        textures["wall"]->LoadTextureImage("../../data/wall_surface.jpg", g_NumLoadedTextures);
+        textures["wall"]->LoadTextureImage("../../data/wall_surface.jpg", g_NumLoadedTextures++);
+        textures["box"] = std::unique_ptr<Texture>(new Texture());
+        textures["box"]->LoadTextureImage("../../data/box_surface.jpg", g_NumLoadedTextures);
 
         models["sphere"].reset(new Model("../../data/sphere.obj"));
         models["bunny"].reset(new Model("../../data/bunny.obj"));
@@ -212,16 +214,15 @@ void Game::render() {
     float boxSize = 1.0f;  // Tamanho uniforme das caixas
 
     for (size_t i = 0; i < boxPositions.size(); ++i) {
-        // TODO: Ajustar textura
-        textures["floor"]->bind();
-        shader->setInt("TextureImage0", textures["floor"]->getTextureUnit());
+        textures["box"]->bind();
+        shader->setInt("TextureImage0", textures["box"]->getTextureUnit());
         modelMatrix = Matrix_Translate(boxPositions[i].x, boxPositions[i].y, boxPositions[i].z) 
                     * Matrix_Scale(boxSize, boxSize, boxSize);
 
         shader->setMat4("model", modelMatrix);
-        shader->setInt("object_id", 2);  // Mesmo ID das paredes por enquanto
+        shader->setInt("object_id", 7);  // Mesmo ID das paredes por enquanto
         models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
-        textures["ceiling"]->unbind();
+        textures["box"]->unbind();
     }
 
     for (const auto& pos : boxPositions) {

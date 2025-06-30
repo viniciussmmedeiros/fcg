@@ -26,6 +26,7 @@ uniform mat4 projection;
 #define FLOOR 4
 #define WALL 5
 #define CEILING 6
+#define BOX 7
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -72,7 +73,7 @@ void main()
     float U = 0.0;
     float V = 0.0;
 
-    if ( object_id == SPHERE )
+    if ( object_id == SPHERE || object_id == BOX )
     {
         // PREENCHA AQUI as coordenadas de textura da esfera, computadas com
         // projeção esférica EM COORDENADAS DO MODELO. Utilize como referência
