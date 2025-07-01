@@ -20,6 +20,7 @@ class Game {
         void handleCursorPos(double xpos, double ypos);
         void processCowMovement(float deltaTime);
         void updateSphereAnimation(float deltaTime);
+        bool checkCowMovementAndPushBoxes(const glm::vec3& newCowPos, const glm::vec3& movementDirection);
 
     private:
         void init();
@@ -58,6 +59,10 @@ class Game {
         float sphereAnimationTime = 0.0f;
         float sphereAnimationDuration = 5.0f;
         glm::vec3 sphereBezierP0, sphereBezierP1, sphereBezierP2, sphereBezierP3;
+
+        // Posições dinâmicas das caixas que podem ser empurradas
+        std::vector<glm::vec3> boxPositions;
+        float boxSize = 1.0f;
 
         bool keyWPressed = false;
         bool keyAPressed = false;

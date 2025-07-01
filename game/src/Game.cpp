@@ -43,6 +43,13 @@ void Game::init() {
     sphereBezierP2 = glm::vec3(1.0f, 3.0f, -1.0f);   // segundo ponto de controle
     sphereBezierP3 = glm::vec3(3.0f, 1.0f, 3.0f);    // ponto final
 
+    // Inicializar posições das caixas
+    boxPositions = {
+        glm::vec3(2.0f, -0.4f, 2.0f),
+        glm::vec3(-2.0f, -0.4f, -2.0f),
+        glm::vec3(1.0f, -0.4f, -3.0f)
+    };
+
     try {
         shader.reset(new Shader("../../src/shader_vertex.glsl", "../../src/shader_fragment.glsl"));
 
@@ -229,15 +236,7 @@ void Game::render() {
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["ceiling"]->unbind();
 
-    // Lista de posições para caixas na cena
-    std::vector<glm::vec3> boxPositions = {
-        glm::vec3(2.0f, -0.4f, 2.0f),
-        glm::vec3(-2.0f, -0.4f, -2.0f),
-        glm::vec3(1.0f, -0.4f, -3.0f)
-    };
-
-    float boxSize = 1.0f;  // Tamanho uniforme das caixas
-
+    // Lista de posições para caixas na cena - agora usando as posições dinâmicas
     for (size_t i = 0; i < boxPositions.size(); ++i) {
         textures["box"]->bind();
         shader->setInt("TextureImage0", textures["box"]->getTextureUnit());
@@ -245,11 +244,33 @@ void Game::render() {
                     * Matrix_Scale(boxSize, boxSize, boxSize);
 
         shader->setMat4("model", modelMatrix);
-        shader->setInt("object_id", 7);  // Mesmo ID das paredes por enquanto
+        shader->setInt("object_id", 7);
         models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
         textures["box"]->unbind();
     }
 
+    // Atualizar obstáculos do mundo dinamicamente
+    worldObstacles.clear();
+    
+    // Adicionar paredes como obstáculos fixos
+    worldObstacles.push_back({
+        glm::vec3(-roomSize/2.0f - wallThickness/2.0f, -1.0f, -roomSize/2.0f),
+        glm::vec3(-roomSize/2.0f + wallThickness/2.0f, wallHeight-1.0f, roomSize/2.0f)
+    });
+    worldObstacles.push_back({
+        glm::vec3(roomSize/2.0f - wallThickness/2.0f, -1.0f, -roomSize/2.0f),
+        glm::vec3(roomSize/2.0f + wallThickness/2.0f, wallHeight-1.0f, roomSize/2.0f)
+    });
+    worldObstacles.push_back({
+        glm::vec3(-roomSize/2.0f, -1.0f, -roomSize/2.0f - wallThickness/2.0f),
+        glm::vec3(roomSize/2.0f, wallHeight-1.0f, -roomSize/2.0f + wallThickness/2.0f)
+    });
+    worldObstacles.push_back({
+        glm::vec3(-roomSize/2.0f, -1.0f, roomSize/2.0f - wallThickness/2.0f),
+        glm::vec3(roomSize/2.0f, wallHeight-1.0f, roomSize/2.0f + wallThickness/2.0f)
+    });
+
+    // Adicionar caixas como obstáculos (agora usando posições dinâmicas)
     for (const auto& pos : boxPositions) {
         worldObstacles.push_back({
             pos + glm::vec3(-boxSize/2.0f, 0.0f, -boxSize/2.0f),
@@ -331,7 +352,7 @@ void Game::processCowMovement(float deltaTime) {
             newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
         };
     
-        if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+        if (!checkCowMovementAndPushBoxes(newPos, forwardVec)) {
             cowPosition = newPos;
         }
     }
@@ -340,12 +361,7 @@ void Game::processCowMovement(float deltaTime) {
         glm::vec3 backwardVec = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
         glm::vec3 newPos = cowPosition + backwardVec * speed_cow;
         
-        Collisions::AABB newCow = {
-            newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
-            newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
-        };
-
-        if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+        if (!checkCowMovementAndPushBoxes(newPos, backwardVec)) {
             cowPosition = newPos;
         }
     }
@@ -353,12 +369,8 @@ void Game::processCowMovement(float deltaTime) {
     if (keyPressed[GLFW_KEY_A]) {
         glm::vec3 leftVec = glm::vec3(cowOrientation * glm::vec4(-cowRight, 0.0f));
         glm::vec3 newPos = cowPosition + leftVec * speed_cow;
-        Collisions::AABB newCow = {
-            newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
-            newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
-        };
-
-        if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+        
+        if (!checkCowMovementAndPushBoxes(newPos, leftVec)) {
             cowPosition = newPos;
         }
     }
@@ -366,12 +378,8 @@ void Game::processCowMovement(float deltaTime) {
     if (keyPressed[GLFW_KEY_D]) {
         glm::vec3 rightVec = glm::vec3(cowOrientation * glm::vec4(cowRight, 0.0f));
         glm::vec3 newPos = cowPosition + rightVec * speed_cow;
-        Collisions::AABB newCow = {
-            newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
-            newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
-        };
-
-        if (!Collisions::CheckCowCollisionWithWorld(newCow, worldObstacles)) {
+        
+        if (!checkCowMovementAndPushBoxes(newPos, rightVec)) {
             cowPosition = newPos;
         }
     }
@@ -438,4 +446,90 @@ void Game::processCowMovement(float deltaTime) {
 void Game::updateSphereAnimation(float deltaTime) {
     sphereAnimationTime += deltaTime;
     // O tempo continua crescendo, e usamos fmod na renderização para ciclar
+}
+
+bool Game::checkCowMovementAndPushBoxes(const glm::vec3& newCowPos, const glm::vec3& movementDirection) {
+    Collisions::AABB newCow = {
+        newCowPos + glm::vec3(-0.5f, 0.0f, -0.5f),
+        newCowPos + glm::vec3( 0.5f, 1.0f,  0.5f)
+    };
+
+    // Verificar colisão com cada caixa
+    for (size_t i = 0; i < boxPositions.size(); ++i) {
+        Collisions::AABB box = {
+            boxPositions[i] + glm::vec3(-boxSize/2.0f, 0.0f, -boxSize/2.0f),
+            boxPositions[i] + glm::vec3(boxSize/2.0f, boxSize, boxSize/2.0f)
+        };
+
+        if (Collisions::CheckAABBCollision(newCow, box)) {
+            // Tentar empurrar a caixa
+            float pushDistance = 0.05f; // Distância que a caixa será empurrada
+            glm::vec3 pushDirection = glm::normalize(movementDirection);
+            glm::vec3 newBoxPos = boxPositions[i] + pushDirection * pushDistance;
+
+            // Verificar se a nova posição da caixa é válida
+            Collisions::AABB newBox = {
+                newBoxPos + glm::vec3(-boxSize/2.0f, 0.0f, -boxSize/2.0f),
+                newBoxPos + glm::vec3(boxSize/2.0f, boxSize, boxSize/2.0f)
+            };
+
+            // Verificar colisão da caixa com paredes (apenas obstáculos fixos)
+            std::vector<Collisions::AABB> fixedObstacles = {
+                // Paredes
+                {glm::vec3(-5.1f, -1.0f, -5.0f), glm::vec3(-4.9f, 2.0f, 5.0f)}, // esquerda
+                {glm::vec3(4.9f, -1.0f, -5.0f), glm::vec3(5.1f, 2.0f, 5.0f)},   // direita
+                {glm::vec3(-5.0f, -1.0f, -5.1f), glm::vec3(5.0f, 2.0f, -4.9f)}, // frente
+                {glm::vec3(-5.0f, -1.0f, 4.9f), glm::vec3(5.0f, 2.0f, 5.1f)}    // trás
+            };
+
+            // Verificar colisão com outras caixas
+            bool canPushBox = true;
+            for (size_t j = 0; j < boxPositions.size(); ++j) {
+                if (i != j) { // Não verificar colisão consigo mesma
+                    Collisions::AABB otherBox = {
+                        boxPositions[j] + glm::vec3(-boxSize/2.0f, 0.0f, -boxSize/2.0f),
+                        boxPositions[j] + glm::vec3(boxSize/2.0f, boxSize, boxSize/2.0f)
+                    };
+                    if (Collisions::CheckAABBCollision(newBox, otherBox)) {
+                        canPushBox = false;
+                        break;
+                    }
+                }
+            }
+
+            // Verificar colisão com paredes
+            if (canPushBox) {
+                for (const auto& obstacle : fixedObstacles) {
+                    if (Collisions::CheckAABBCollision(newBox, obstacle)) {
+                        canPushBox = false;
+                        break;
+                    }
+                }
+            }
+
+            if (canPushBox) {
+                // Empurrar a caixa
+                boxPositions[i] = newBoxPos;
+                return false; // Movimento da vaca permitido
+            } else {
+                return true; // Movimento da vaca bloqueado
+            }
+        }
+    }
+
+    // Verificar colisão com obstáculos fixos (paredes)
+    std::vector<Collisions::AABB> fixedObstacles = {
+        {glm::vec3(-5.1f, -1.0f, -5.0f), glm::vec3(-4.9f, 2.0f, 5.0f)},
+        {glm::vec3(4.9f, -1.0f, -5.0f), glm::vec3(5.1f, 2.0f, 5.0f)},
+        {glm::vec3(-5.0f, -1.0f, -5.1f), glm::vec3(5.0f, 2.0f, -4.9f)},
+        {glm::vec3(-5.0f, -1.0f, 4.9f), glm::vec3(5.0f, 2.0f, 5.1f)}
+    };
+
+    for (const auto& obstacle : fixedObstacles) {
+        if (Collisions::CheckAABBCollision(newCow, obstacle)) {
+            return true; // Movimento bloqueado por parede
+        }
+    }
+
+    return false; // Movimento permitido
 }
