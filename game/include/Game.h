@@ -19,6 +19,7 @@ class Game {
         void handleMouseButton(int button, int action, int mod);
         void handleCursorPos(double xpos, double ypos);
         void processCowMovement(float deltaTime);
+        void updateSphereAnimation(float deltaTime);
 
     private:
         void init();
@@ -52,6 +53,11 @@ class Game {
         float bunnyAngleX = 0.0f;
         float bunnyAngleY = 0.0f;
         float bunnyAngleZ = 0.0f;
+
+        // Variáveis para animação da esfera com curva de Bézier
+        float sphereAnimationTime = 0.0f;
+        float sphereAnimationDuration = 5.0f;
+        glm::vec3 sphereBezierP0, sphereBezierP1, sphereBezierP2, sphereBezierP3;
 
         bool keyWPressed = false;
         bool keyAPressed = false;

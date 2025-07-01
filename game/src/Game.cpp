@@ -7,6 +7,14 @@
 
 using namespace std;
 
+
+glm::vec3 bezierCubic(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, float t) {
+    return float(std::pow(1 - t, 3)) * p0 +
+           3.0f * t * float(std::pow(1 - t, 2)) * p1 +
+           3.0f * float(std::pow(t, 2)) * (1 - t) * p2 +
+           float(std::pow(t, 3)) * p3;
+}
+
 // Quando um objeto de 'Game' é criado, ele também cria um objeto
 // de 'Window' para o membro 'window'
 Game::Game() : window(800, 800, "Escape da Vaca") {
@@ -24,6 +32,16 @@ void Game::init() {
     glfwSetCursorPosCallback(window.getNativeWindow(), Input::CursorPosCallback);
 
     cowPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    // Inicializar parâmetros da animação da esfera
+    sphereAnimationTime = 0.0f;
+    sphereAnimationDuration = 5.0f; // 5 segundos para completar a curva
+    
+    // Definir pontos de controle da curva de Bézier para a esfera
+    sphereBezierP0 = glm::vec3(-3.0f, 2.0f, -3.0f);  // ponto inicial
+    sphereBezierP1 = glm::vec3(-1.0f, 4.0f, 1.0f);   // primeiro ponto de controle
+    sphereBezierP2 = glm::vec3(1.0f, 3.0f, -1.0f);   // segundo ponto de controle
+    sphereBezierP3 = glm::vec3(3.0f, 1.0f, 3.0f);    // ponto final
 
     try {
         shader.reset(new Shader("../../src/shader_vertex.glsl", "../../src/shader_fragment.glsl"));
@@ -71,6 +89,7 @@ void Game::run() {
         lastFrameT = currentFrameT;
 
         processCowMovement(deltaT);
+        updateSphereAnimation(deltaT);
 
         render();
         window.swapBuffers(); // atualiza a tela
@@ -102,10 +121,16 @@ void Game::render() {
     GLint g_bbox_min_uniform = shader->getBBoxMinUniform();
     GLint g_bbox_max_uniform = shader->getBBoxMaxUniform();
 
-    // desenha a esfera
+    // desenha a esfera com posição da curva de Bézier
     textures["earth"]->bind();
     shader->setInt("TextureImage0", textures["earth"]->getTextureUnit());
-    glm::mat4 modelMatrix = Matrix_Translate(-1.0f, 0.0f, 0.0f);
+    
+    // Calcular posição atual na curva de Bézier
+    float t = sphereAnimationTime / sphereAnimationDuration;
+    t = fmod(t, 1.0f); // garantir que t permaneça entre 0 e 1
+    glm::vec3 spherePosition = bezierCubic(sphereBezierP0, sphereBezierP1, sphereBezierP2, sphereBezierP3, t);
+    
+    glm::mat4 modelMatrix = Matrix_Translate(spherePosition.x, spherePosition.y, spherePosition.z) * Matrix_Scale(0.3f, 0.3f, 0.3f);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 0);
     models["sphere"]->draw("the_sphere", g_bbox_min_uniform, g_bbox_max_uniform);
@@ -408,4 +433,9 @@ void Game::processCowMovement(float deltaTime) {
             camera.setFreeCameraPosition(newCameraPos);
         }
     }
+}
+
+void Game::updateSphereAnimation(float deltaTime) {
+    sphereAnimationTime += deltaTime;
+    // O tempo continua crescendo, e usamos fmod na renderização para ciclar
 }
