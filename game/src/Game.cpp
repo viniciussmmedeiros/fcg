@@ -341,16 +341,12 @@ void Game::processCowMovement(float deltaTime) {
         camera.setFreeCamera(!camera.getUseFreeCamera());
     }
 
-    float speed_cow = 0.01f;
+    // Velocidade da vaca em unidades por segundo
+    float speed_cow = 2.0f;
 
     if (keyPressed[GLFW_KEY_W]) {
         glm::vec3 forwardVec = glm::vec3(cowOrientation * glm::vec4(cowForward, 0.0f));
-        glm::vec3 newPos = cowPosition + forwardVec * speed_cow;
-    
-        Collisions::AABB newCow = {
-            newPos + glm::vec3(-0.5f, 0.0f, -0.5f),
-            newPos + glm::vec3( 0.5f, 1.0f,  0.5f)
-        };
+        glm::vec3 newPos = cowPosition + forwardVec * speed_cow * deltaTime;
     
         if (!checkCowMovementAndPushBoxes(newPos, forwardVec)) {
             cowPosition = newPos;
@@ -359,7 +355,7 @@ void Game::processCowMovement(float deltaTime) {
 
     if (keyPressed[GLFW_KEY_S]) {
         glm::vec3 backwardVec = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
-        glm::vec3 newPos = cowPosition + backwardVec * speed_cow;
+        glm::vec3 newPos = cowPosition + backwardVec * speed_cow * deltaTime;
         
         if (!checkCowMovementAndPushBoxes(newPos, backwardVec)) {
             cowPosition = newPos;
@@ -368,7 +364,7 @@ void Game::processCowMovement(float deltaTime) {
 
     if (keyPressed[GLFW_KEY_A]) {
         glm::vec3 leftVec = glm::vec3(cowOrientation * glm::vec4(-cowRight, 0.0f));
-        glm::vec3 newPos = cowPosition + leftVec * speed_cow;
+        glm::vec3 newPos = cowPosition + leftVec * speed_cow * deltaTime;
         
         if (!checkCowMovementAndPushBoxes(newPos, leftVec)) {
             cowPosition = newPos;
@@ -377,14 +373,15 @@ void Game::processCowMovement(float deltaTime) {
 
     if (keyPressed[GLFW_KEY_D]) {
         glm::vec3 rightVec = glm::vec3(cowOrientation * glm::vec4(cowRight, 0.0f));
-        glm::vec3 newPos = cowPosition + rightVec * speed_cow;
+        glm::vec3 newPos = cowPosition + rightVec * speed_cow * deltaTime;
         
         if (!checkCowMovementAndPushBoxes(newPos, rightVec)) {
             cowPosition = newPos;
         }
     }
 
-    float speed = 0.01f;
+    // Velocidade da câmera em unidades por segundo
+    float speed = 3.0f;
     glm::vec4 vector_u = crossproduct(glm::vec4(0.0f,1.0f,0.0f,0.0f), camera.getCameraViewVector());
     vector_u = normalize(vector_u);
 
@@ -395,7 +392,7 @@ void Game::processCowMovement(float deltaTime) {
     glm::vec4 currentCameraPos = camera.getFreeCameraPosition();
 
     if (keyPressed[GLFW_KEY_T]) {
-        glm::vec4 newCameraPos = currentCameraPos + speed * camera.getCameraViewVector();
+        glm::vec4 newCameraPos = currentCameraPos + speed * deltaTime * camera.getCameraViewVector();
         Collisions::AABB cameraBox = {
             glm::vec3(newCameraPos) + cameraBoxMin,
             glm::vec3(newCameraPos) + cameraBoxMax
@@ -407,7 +404,7 @@ void Game::processCowMovement(float deltaTime) {
     }
 
     if (keyPressed[GLFW_KEY_Y]) {
-        glm::vec4 newCameraPos = currentCameraPos - speed * camera.getCameraViewVector();
+        glm::vec4 newCameraPos = currentCameraPos - speed * deltaTime * camera.getCameraViewVector();
         Collisions::AABB cameraBox = {
             glm::vec3(newCameraPos) + cameraBoxMin,
             glm::vec3(newCameraPos) + cameraBoxMax
@@ -419,7 +416,7 @@ void Game::processCowMovement(float deltaTime) {
     }
 
     if (keyPressed[GLFW_KEY_U]) {
-        glm::vec4 newCameraPos = currentCameraPos + speed * vector_u;
+        glm::vec4 newCameraPos = currentCameraPos + speed * deltaTime * vector_u;
         Collisions::AABB cameraBox = {
             glm::vec3(newCameraPos) + cameraBoxMin,
             glm::vec3(newCameraPos) + cameraBoxMax
@@ -431,7 +428,7 @@ void Game::processCowMovement(float deltaTime) {
     }
 
     if (keyPressed[GLFW_KEY_I]) {
-        glm::vec4 newCameraPos = currentCameraPos - speed * vector_u;
+        glm::vec4 newCameraPos = currentCameraPos - speed * deltaTime * vector_u;
         Collisions::AABB cameraBox = {
             glm::vec3(newCameraPos) + cameraBoxMin,
             glm::vec3(newCameraPos) + cameraBoxMax
@@ -462,8 +459,8 @@ bool Game::checkCowMovementAndPushBoxes(const glm::vec3& newCowPos, const glm::v
         };
 
         if (Collisions::CheckAABBCollision(newCow, box)) {
-            // Tentar empurrar a caixa
-            float pushDistance = 0.05f; // Distância que a caixa será empurrada
+            // Tentar empurrar a caixa com velocidade proporcional ao movimento da vaca
+            float pushDistance = 0.3f; // Distância base que a caixa será empurrada
             glm::vec3 pushDirection = glm::normalize(movementDirection);
             glm::vec3 newBoxPos = boxPositions[i] + pushDirection * pushDistance;
 
