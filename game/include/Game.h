@@ -49,6 +49,7 @@ class Game {
         float cowAngleY = 0.0f;
         float cowAngleZ = 0.0f;
         glm::vec3 cowPosition;
+        glm::mat4 cowOrientation;
 
         // Ângulos de Euler que controlam a rotação de um dos cubos da cena virtual
         float bunnyAngleX = 0.0f;

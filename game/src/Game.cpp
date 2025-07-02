@@ -146,7 +146,8 @@ void Game::render() {
     // desenha a vaca
     textures["cow"]->bind();
     shader->setInt("TextureImage0", textures["cow"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(cowPosition.x, cowPosition.y, cowPosition.z);
+    // modelMatrix = Matrix_Translate(cowPosition.x, cowPosition.y, cowPosition.z);
+    modelMatrix = Matrix_Translate(cowPosition.x, cowPosition.y, cowPosition.z) * cowOrientation;
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 3);
     models["cow"]->draw("the_cow", g_bbox_min_uniform, g_bbox_max_uniform);
@@ -330,12 +331,22 @@ void Game::processCowMovement(float deltaTime) {
     
     float delta = 3.141592 / 16.0f;
     
-    glm::mat4 cowOrientation = Matrix_Rotate_Z(cowAngleZ) *
-                               Matrix_Rotate_Y(cowAngleY) *
-                               Matrix_Rotate_X(cowAngleX);
+    // glm::mat4 cowOrientation = Matrix_Rotate_Z(cowAngleZ) *
+    //                            Matrix_Rotate_Y(cowAngleY) *
+    //                            Matrix_Rotate_X(cowAngleX);
+
+    cowOrientation = Matrix_Rotate_Y(camera.getFreeCameraTheta() - M_PI / 2);
 
     glm::vec3 cowForward(1.0f, 0.0f, 0.0f); // +x é para frente
     glm::vec3 cowRight(0.0f, 0.0f, 1.0f); // +z é direita
+    const float distance_from_cow = 2.0f;
+    const float height_above_cow = 1.0f;
+    glm::vec4 view_vector = camera.getCameraViewVector();
+    glm::vec4 offset = -distance_from_cow * glm::normalize(view_vector);
+    glm::vec4 new_camera_pos = glm::vec4(cowPosition, 1.0f) + offset;
+    new_camera_pos.y += height_above_cow;
+
+    camera.setFreeCameraPosition(new_camera_pos);
 
     if (keyPressed[GLFW_KEY_V]) {
         camera.setFreeCamera(!camera.getUseFreeCamera());

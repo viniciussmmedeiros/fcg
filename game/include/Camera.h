@@ -31,6 +31,10 @@ class Camera {
             return camera_view_vector;
         }
 
+        float getFreeCameraTheta() {
+            return freeCameraTheta;
+        }
+
     private:
         void init();
         
