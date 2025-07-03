@@ -73,7 +73,7 @@ void main()
     float U = 0.0;
     float V = 0.0;
 
-    if ( object_id == SPHERE || object_id == BOX )
+    if ( object_id == SPHERE )
     {
         // PREENCHA AQUI as coordenadas de textura da esfera, computadas com
         // projeção esférica EM COORDENADAS DO MODELO. Utilize como referência
@@ -124,7 +124,7 @@ void main()
         V = (position_model.y - miny) / (maxy - miny);
     }
     else if ( 
-        object_id == PLANE || object_id == FLOOR || object_id == WALL || object_id == CEILING )
+        object_id == PLANE || object_id == FLOOR || object_id == WALL || object_id == CEILING || object_id == BOX )
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
         U = texcoords.x;

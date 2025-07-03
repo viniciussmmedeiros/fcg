@@ -31,17 +31,22 @@ void Game::init() {
     glfwSetMouseButtonCallback(window.getNativeWindow(), Input::MouseButtonCallback);
     glfwSetCursorPosCallback(window.getNativeWindow(), Input::CursorPosCallback);
 
-    cowPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+    cowPosition = glm::vec3(0.0f, -0.4f, 0.0f);
 
     // Inicializar parâmetros da animação da esfera
     sphereAnimationTime = 0.0f;
     sphereAnimationDuration = 5.0f; // 5 segundos para completar a curva
     
     // Definir pontos de controle da curva de Bézier para a esfera
-    sphereBezierP0 = glm::vec3(-3.0f, 2.0f, -3.0f);  // ponto inicial
-    sphereBezierP1 = glm::vec3(-1.0f, 4.0f, 1.0f);   // primeiro ponto de controle
-    sphereBezierP2 = glm::vec3(1.0f, 3.0f, -1.0f);   // segundo ponto de controle
-    sphereBezierP3 = glm::vec3(3.0f, 1.0f, 3.0f);    // ponto final
+    // sphereBezierP0 = glm::vec3(-3.0f, 2.0f, -3.0f);  // ponto inicial
+    // sphereBezierP1 = glm::vec3(-1.0f, 4.0f, 1.0f);   // primeiro ponto de controle
+    // sphereBezierP2 = glm::vec3(1.0f, 3.0f, -1.0f);   // segundo ponto de controle
+    // sphereBezierP3 = glm::vec3(3.0f, 1.0f, 3.0f);    // ponto final
+
+    sphereBezierP0 = glm::vec3(-3.0f, 0.5f, -3.0f);
+    sphereBezierP1 = glm::vec3(-1.0f, 1.5f, 3.0f);
+    sphereBezierP2 = glm::vec3(1.0f, 1.5f, -3.0f);
+    sphereBezierP3 = glm::vec3(3.0f, 0.5f, 3.0f);
 
     // Inicializar posições das caixas
     boxPositions = {
@@ -169,8 +174,9 @@ void Game::render() {
     // Parede esquerda
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(-roomSize / 2.0f, wallHeight / 2.0f - 1.0f, 0.0f) 
+    modelMatrix = Matrix_Translate(-roomSize / 2.0f - 0.1f, wallHeight / 2.0f - 1.0f, 0.0f) 
             * Matrix_Scale(wallThickness, wallHeight, roomSize);
+
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 5);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
@@ -184,7 +190,7 @@ void Game::render() {
     // Parede direita
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(roomSize / 2.0f, wallHeight / 2.0f - 1.0f, 0.0f) 
+    modelMatrix = Matrix_Translate(roomSize / 2.0f + 0.1f, wallHeight / 2.0f - 1.0f, 0.0f) 
         * Matrix_Scale(wallThickness, wallHeight, roomSize);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 2);
@@ -199,7 +205,7 @@ void Game::render() {
     // Parede frontal
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(0.0f, wallHeight / 2.0f - 1.0f, -roomSize / 2.0f) * Matrix_Scale(roomSize, wallHeight, wallThickness);
+    modelMatrix = Matrix_Translate(0.0f, wallHeight / 2.0f - 1.0f, -roomSize / 2.0f - 0.1f) * Matrix_Scale(roomSize, wallHeight, wallThickness);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 1);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
@@ -213,7 +219,7 @@ void Game::render() {
     // Parede de trás
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(0.0f, wallHeight / 2.0f - 1.0f, roomSize / 2.0f) * Matrix_Scale(roomSize, wallHeight, wallThickness);
+    modelMatrix = Matrix_Translate(0.0f, wallHeight / 2.0f - 1.0f, roomSize / 2.0f + 0.1f) * Matrix_Scale(roomSize, wallHeight, wallThickness);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 1);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
@@ -458,8 +464,8 @@ void Game::updateSphereAnimation(float deltaTime) {
 
 bool Game::checkCowMovementAndPushBoxes(const glm::vec3& newCowPos, const glm::vec3& movementDirection) {
     Collisions::AABB newCow = {
-        newCowPos + glm::vec3(-0.5f, 0.0f, -0.5f),
-        newCowPos + glm::vec3( 0.5f, 1.0f,  0.5f)
+        newCowPos + glm::vec3(-0.8f, 0.0f, -0.3f),
+        newCowPos + glm::vec3( 0.8f, 1.2f,  0.3f)
     };
 
     // Verificar colisão com cada caixa
