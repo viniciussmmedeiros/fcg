@@ -48,8 +48,11 @@ Model::Model(const string& path) {
             const glm::vec4  a = vertices[0];
             const glm::vec4  b = vertices[1];
             const glm::vec4  c = vertices[2];
+            
+            const glm::vec4 ab = glm::vec4(b - a);
+            const glm::vec4 ac = glm::vec4(c - a);
 
-            const glm::vec4  n = crossproduct(b-a,c-a);
+            const glm::vec4 n = crossproduct(ab, ac);
 
             for (size_t vertex = 0; vertex < 3; ++vertex)
             {
