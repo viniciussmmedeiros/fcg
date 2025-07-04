@@ -10,6 +10,7 @@
 #include <glm/vec4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+// FONTE: Todas as funções desse arquivo são oriundas dos laboratórios.
 // Esta função Matrix() auxilia na criação de matrizes usando a biblioteca GLM.
 // Note que em OpenGL (e GLM) as matrizes são definidas como "column-major",
 // onde os elementos da matriz são armazenadas percorrendo as COLUNAS da mesma.
