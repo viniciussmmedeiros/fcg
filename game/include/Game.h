@@ -6,6 +6,7 @@
 #include "Input.h"
 #include "Texture.h"
 #include "Collisions.h"
+#include "TextRenderer.h" 
 #include <memory>
 #include <map>
 
@@ -73,4 +74,9 @@ class Game {
         std::vector<Collisions::AABB> worldObstacles;
 
         bool keyPressed[1024] = {false};
+
+        bool showInfoText = true;
+        void renderInfoText();
+        void renderPermanentText();
+        void renderFPS();
 };

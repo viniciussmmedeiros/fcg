@@ -89,6 +89,8 @@ void Game::init() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+
+    TextRendering_Init();
 }
 
 void Game::run() {
@@ -104,13 +106,16 @@ void Game::run() {
         updateSphereAnimation(deltaT);
 
         render();
+        renderInfoText();
+        renderPermanentText();
+        renderFPS(); 
         window.swapBuffers(); // atualiza a tela
         glfwPollEvents(); // processa eventos tipo input
     }
 }
 
 void Game::render() {
-    printf("\n[TESTES]\n\tT Y U I -> movimentam a câmera livre\n\tW A S D -> movimentam a vaca\n\tV -> troca entre câmera livre e look-at\n");
+    //printf("\n[TESTES]\n\tT Y U I -> movimentam a câmera livre\n\tW A S D -> movimentam a vaca\n\tV -> troca entre câmera livre e look-at\n");
     // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
     // definida como coeficientes RGBA: Red, Green, Blue, Alpha; isto é:
     // Vermelho, Verde, Azul, Alpha (valor de transparência).
@@ -397,6 +402,11 @@ void Game::processCowMovement(float deltaTime) {
         }
     }
 
+    if (keyPressed[GLFW_KEY_H]) {
+        showInfoText = !showInfoText;
+        keyPressed[GLFW_KEY_H] = false;
+    }
+
     // Velocidade da câmera em unidades por segundo
     float speed = 3.0f;
     glm::vec4 vector_u = crossproduct(glm::vec4(0.0f,1.0f,0.0f,0.0f), camera.getCameraViewVector());
@@ -546,4 +556,38 @@ bool Game::checkCowMovementAndPushBoxes(const glm::vec3& newCowPos, const glm::v
     }
 
     return false; // Movimento permitido
+}
+
+void Game::renderPermanentText() {
+    TextRendering_PrintString(window.getNativeWindow(), "Pressione H para habilitar / desabilitar a ajuda.", -0.95f, 0.75f, 0.6f);
+}
+
+void Game::renderInfoText() {
+    if (!showInfoText) {
+        return;
+    }
+
+    TextRendering_PrintString(window.getNativeWindow(), "W,A,S,D para mover a vaca", -0.95f, 0.95f, 0.6f);
+    TextRendering_PrintString(window.getNativeWindow(), "V para trocar a camera (free / look-at)", -0.95f, 0.90f, 0.6f);
+}
+
+void Game::renderFPS() {
+    static float old_seconds = 0.0f;
+    static int   ellapsed_frames = 0;
+    static char  buffer[20] = "?? fps";
+
+    ellapsed_frames += 1;
+    float seconds = glfwGetTime();
+    float ellapsed_seconds = seconds - old_seconds;
+
+    if (ellapsed_seconds > 1.0f)
+    {
+        snprintf(buffer, 20, "%.2f fps", ellapsed_frames / ellapsed_seconds);
+        old_seconds = seconds;
+        ellapsed_frames = 0;
+    }
+
+    if (showInfoText) {
+        TextRendering_PrintString(window.getNativeWindow(), buffer, 0.75f, 0.95f, 0.6f);
+    }
 }
