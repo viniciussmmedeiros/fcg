@@ -41,6 +41,8 @@ uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
 
+uniform vec3 object_game_color;
+
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
 
@@ -145,7 +147,7 @@ void main()
         vec3 texture_color = texture(TextureImage0, vec2(U,V)).rgb;
         
         // Usa a cor interpolada do vertex shader (Gouraud) modulada pela textura
-        color.rgb = gouraud_color * texture_color;
+        color.rgb = gouraud_color * texture_color * object_game_color;
     }
 
     // Alpha default = 1 = 100% opaco = 0% transparente

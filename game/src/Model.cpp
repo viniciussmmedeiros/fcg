@@ -7,7 +7,6 @@ using namespace std;
 
 Model::Model(const string& path) {
     // essa parte é equivalente ao "ObjModel xpto("../../data/xpto.obj");" do lab
-    printf("\n aqui 1");
     tinyobj::attrib_t attrib;
     vector<tinyobj::shape_t> shapes;
     vector<tinyobj::material_t> materials;
@@ -25,7 +24,6 @@ Model::Model(const string& path) {
 
     std::vector<int> num_triangles_per_vertex(num_vertices, 0);
     std::vector<glm::vec4> vertex_normals(num_vertices, glm::vec4(0.0f,0.0f,0.0f,0.0f));
-    printf("\n aqui 2");
 
     for (size_t shape = 0; shape < shapes.size(); ++shape)
     {
@@ -65,7 +63,6 @@ Model::Model(const string& path) {
     }
 
     attrib.normals.resize( 3*num_vertices );
-    printf("\n aqui 3");
 
     for (size_t i = 0; i < vertex_normals.size(); ++i)
     {
@@ -86,7 +83,6 @@ Model::Model(const string& path) {
     std::vector<float>  normal_coefficients;
     std::vector<float>  texture_coefficients;
 
-    printf("\n aqui 4");
 
     for (size_t shape = 0; shape < shapes.size(); ++shape)
     {
@@ -163,7 +159,6 @@ Model::Model(const string& path) {
         theobject.bbox_min = bbox_min;
         theobject.bbox_max = bbox_max;
         g_VirtualScene[shapes[shape].name] = theobject;
-        printf("\nThe name of the object is %s\n", shapes[shape].name.c_str());
     }
 
     GLuint VBO_model_coefficients_id;

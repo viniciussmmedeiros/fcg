@@ -26,6 +26,7 @@ class Game {
     private:
         void init();
         void render();
+        void updateGameState();
 
         Window window;
         Camera camera;
@@ -34,6 +35,14 @@ class Game {
         std::map<std::string, std::unique_ptr<Texture>> textures;
         std::map<std::string, std::unique_ptr<Model>> models;
 
+        std::vector<glm::vec3> boxColors;
+        std::vector<glm::vec3> tilePositions;
+
+        std::vector<bool> boxInPlace;
+        bool gameWon = false;
+        int correctPlacementsCount = 0;
+        void renderWinMessage();
+        
         // Se o usuário pressionou o botão esquerdo do mouse, guardamos a
         // posição atual do cursor nas variáveis g_LastCursorPosX e
         // g_LastCursorPosY.  Também, setamos a variável

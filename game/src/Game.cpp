@@ -55,6 +55,14 @@ void Game::init() {
         glm::vec3(1.0f, -0.4f, -3.0f)
     };
 
+    boxInPlace.resize(boxPositions.size(), false);
+    boxColors.push_back(glm::vec3(1.0f, 0.2f, 0.2f));
+    boxColors.push_back(glm::vec3(0.2f, 1.0f, 0.2f));
+    boxColors.push_back(glm::vec3(0.2f, 0.2f, 1.0f));
+    tilePositions.push_back(glm::vec3(4.0f, -0.99f, 4.0f));
+    tilePositions.push_back(glm::vec3(-4.0f, -0.99f, 4.0f));
+    tilePositions.push_back(glm::vec3(0.0f, -0.99f, -4.0f));
+
     try {
         shader.reset(new Shader("../../src/shader_vertex.glsl", "../../src/shader_fragment.glsl"));
 
@@ -104,11 +112,13 @@ void Game::run() {
 
         processCowMovement(deltaT);
         updateSphereAnimation(deltaT);
+        updateGameState();
 
         render();
         renderInfoText();
         renderPermanentText();
         renderFPS(); 
+        renderWinMessage();
         window.swapBuffers(); // atualiza a tela
         glfwPollEvents(); // processa eventos tipo input
     }
@@ -134,6 +144,7 @@ void Game::render() {
     shader->use();
     shader->setMat4("view", viewMatrix);
     shader->setMat4("projection", projectionMatrix);
+    shader->setVec3("object_game_color", glm::vec3(1.0f, 1.0f, 1.0f));
 
     GLint g_bbox_min_uniform = shader->getBBoxMinUniform();
     GLint g_bbox_max_uniform = shader->getBBoxMaxUniform();
@@ -252,6 +263,7 @@ void Game::render() {
     for (size_t i = 0; i < boxPositions.size(); ++i) {
         textures["box"]->bind();
         shader->setInt("TextureImage0", textures["box"]->getTextureUnit());
+        shader->setVec3("object_game_color", boxColors[i]);
         modelMatrix = Matrix_Translate(boxPositions[i].x, boxPositions[i].y, boxPositions[i].z) 
                     * Matrix_Scale(boxSize, boxSize, boxSize);
 
@@ -259,6 +271,18 @@ void Game::render() {
         shader->setInt("object_id", 7);
         models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
         textures["box"]->unbind();
+    }
+
+    shader->setVec3("object_game_color", glm::vec3(1.0f, 1.0f, 1.0f)); 
+    textures["floor"]->bind();
+    shader->setInt("TextureImage0", textures["floor"]->getTextureUnit());
+    for (size_t i = 0; i < tilePositions.size(); ++i) {
+        shader->setVec3("object_game_color", boxColors[i]);
+
+        modelMatrix = Matrix_Translate(tilePositions[i].x, tilePositions[i].y, tilePositions[i].z)
+                    * Matrix_Scale(0.8f, 0.01f, 0.8f);
+        shader->setMat4("model", modelMatrix);
+        models["plane"]->draw("the_plane", g_bbox_min_uniform, g_bbox_max_uniform);
     }
 
     // Atualizar obstáculos do mundo dinamicamente
@@ -569,6 +593,18 @@ void Game::renderInfoText() {
 
     TextRendering_PrintString(window.getNativeWindow(), "W,A,S,D para mover a vaca", -0.95f, 0.95f, 0.6f);
     TextRendering_PrintString(window.getNativeWindow(), "V para trocar a camera (free / look-at)", -0.95f, 0.90f, 0.6f);
+    char buffer[23];
+    snprintf(buffer, 50, "%d/3 posicoes corretas", correctPlacementsCount); 
+    TextRendering_PrintString(window.getNativeWindow(), buffer, -0.95f, 0.85f, 0.6f);
+
+    TextRendering_PrintString(window.getNativeWindow(), "Objetivo: posicionar os cubos nas cores correspondentes", -0.95f, 0.80f, 0.6f);
+}
+
+void Game::renderWinMessage() {
+    if (gameWon) {
+        std::string winText = "VOCE VENCEU!";
+        TextRendering_PrintString(window.getNativeWindow(), winText, 0.25f, 0.70f, 0.6f);
+    }
 }
 
 void Game::renderFPS() {
@@ -589,5 +625,38 @@ void Game::renderFPS() {
 
     if (showInfoText) {
         TextRendering_PrintString(window.getNativeWindow(), buffer, 0.75f, 0.95f, 0.6f);
+    }
+}
+
+void Game::updateGameState() {
+    if(gameWon) {
+        return;
+    }
+
+    correctPlacementsCount = 0;
+    float tile_size = 0.8f;
+
+    for (size_t i = 0; i < boxPositions.size(); ++i) {
+        Collisions::AABB box_aabb = {
+            boxPositions[i] + glm::vec3(-boxSize / 2.0f, 0.0f, -boxSize / 2.0f),
+            boxPositions[i] + glm::vec3(boxSize / 2.0f, boxSize, boxSize / 2.0f)
+        };
+        Collisions::AABB tile_aabb = {
+            tilePositions[i] + glm::vec3(-tile_size, -0.02f, -tile_size),
+            tilePositions[i] + glm::vec3(tile_size, 0.02f, tile_size)
+        };
+
+        bool x_overlap = (box_aabb.min.x <= tile_aabb.max.x && box_aabb.max.x >= tile_aabb.min.x);
+        bool z_overlap = (box_aabb.min.z <= tile_aabb.max.z && box_aabb.max.z >= tile_aabb.min.z);
+
+        if (x_overlap && z_overlap) {
+            boxInPlace[i] = true;
+            correctPlacementsCount++;
+        } else {
+            boxInPlace[i] = false;
+        }
+    }
+    if (correctPlacementsCount == boxPositions.size()) {
+        gameWon = true;
     }
 }
