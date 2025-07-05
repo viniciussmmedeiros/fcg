@@ -148,7 +148,6 @@ void Game::render() {
 
     GLint g_bbox_min_uniform = shader->getBBoxMinUniform();
     GLint g_bbox_max_uniform = shader->getBBoxMaxUniform();
-
     // desenha a esfera com posição da curva de Bézier
     textures["earth"]->bind();
     shader->setInt("TextureImage0", textures["earth"]->getTextureUnit());
@@ -156,14 +155,22 @@ void Game::render() {
     // Calcular posição atual na curva de Bézier
     float t = sphereAnimationTime / sphereAnimationDuration;
     t = fmod(t, 1.0f); // garantir que t permaneça entre 0 e 1
+    glm::vec3 testPoint = glm::vec3(0.20f, 1.25f, 0.0f);
+    float sphereRadius = 0.3f; // o raio original da esfera é 1, mas aplicamos um 'matrix_scale' de 0.3
     glm::vec3 spherePosition = bezierCubic(sphereBezierP0, sphereBezierP1, sphereBezierP2, sphereBezierP3, t);
-    
+
+    bool hitPoint = Collisions::CheckPointSphereCollision(testPoint, spherePosition, sphereRadius);
+    // printf("\nhit point: %d", hitPoint);
+    // printf("\n sphere position: (%.2f, %.2f, %.2f)\n", spherePosition.x, spherePosition.y, spherePosition.z);
+    if(hitPoint) {
+        shader->setVec3("object_game_color", glm::vec3(252.0f, 0, 0));
+    }
     glm::mat4 modelMatrix = Matrix_Translate(spherePosition.x, spherePosition.y, spherePosition.z) * Matrix_Scale(0.3f, 0.3f, 0.3f);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 0);
     models["sphere"]->draw("the_sphere", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["earth"]->unbind();
-
+    shader->setVec3("object_game_color", glm::vec3(1.0f, 1.0f, 1.0f));
     // desenha a vaca
     textures["cow"]->bind();
     shader->setInt("TextureImage0", textures["cow"]->getTextureUnit());

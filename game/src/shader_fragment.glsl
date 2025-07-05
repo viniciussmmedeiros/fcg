@@ -94,7 +94,7 @@ void main()
         vec3 phong_specular_term = Ks * I * pow(max(0, dot(r_reflect,v)), q);
         vec3 minimum_lighting = Kd * 0.2;
 
-        color.rgb = lambert_diffuse_term + ambient_term + phong_specular_term + minimum_lighting;
+        color.rgb = lambert_diffuse_term + ambient_term + phong_specular_term + minimum_lighting * object_game_color;
     }
     else if ( object_id == BUNNY || object_id == COW )
     {

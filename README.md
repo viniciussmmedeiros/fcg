@@ -23,3 +23,25 @@ ToDo:
 [ ] todos os objetos devem ter textura
 [ ] ao menos um objeto com movimentação relacionada a curva de bezier
 [ ] todas as movimentações devem ser computadas baseado no tempo
+
+Critérios técnicos:
+
+[X] Malhas poligonais complexas (cow.obj)
+
+[X] Transformações geométricas controladas pelo usuário
+
+[X] Câmera livre e câmera look-at
+
+[ ] Instâncias de objetos (duas ou mais model matrix aplicadas ao mesmo conjunto de vértices)
+
+[ ] Três tipos de testes de intersecção (cubo-cubo, cubo-plano, e ponto-esfera) - collisions.
+
+[ ] Modelos de Iluminação Difusa e Blinn-Phong
+
+[ ] Modelos de Interpolação de Phong e Gouraud
+
+[ ] Mapeamento de texturas em todos os objetos
+
+[ ] Movimentação com curva Bézier cúbica
+
+[ ] Animações baseadas no tempo ($\Delta t$) 

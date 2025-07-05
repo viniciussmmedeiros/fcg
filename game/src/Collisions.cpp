@@ -1,4 +1,5 @@
 #include "Collisions.h"
+#include "matrices.h"
 
 bool Collisions::CheckAABBCollision(const AABB& a, const AABB& b) {
     return (a.min.x <= b.max.x && a.max.x >= b.min.x) &&
@@ -13,4 +14,10 @@ bool Collisions::CheckCowCollisionWithWorld(const AABB& cow, const std::vector<A
         }
     }
     return false;
+}
+
+bool Collisions::CheckPointSphereCollision(const glm::vec3& point, const glm::vec3& center, float radius) {
+    glm::vec3 diff = point - center;
+    float dist = dotproduct(glm::vec4(diff, 0.0f), glm::vec4(diff, 0.0f));
+    return dist <= radius * radius;
 }
