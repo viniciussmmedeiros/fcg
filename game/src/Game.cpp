@@ -345,8 +345,6 @@ void Game::processCowMovement(float deltaTime) {
         glfwSetWindowShouldClose(window.getNativeWindow(), true);
     }
     
-    float delta = 3.141592 / 16.0f;
-    
     cowOrientation = Matrix_Rotate_Y(camera.getFreeCameraTheta() - M_PI / 2);
 
     glm::vec3 cowForward(1.0f, 0.0f, 0.0f); // +x é para frente
@@ -512,7 +510,7 @@ void Game::renderInfoText() {
     TextRendering_PrintString(window.getNativeWindow(), "W,A,S,D para mover a vaca", -0.95f, 0.95f, 0.6f);
     TextRendering_PrintString(window.getNativeWindow(), "V para trocar a camera (free / look-at)", -0.95f, 0.90f, 0.6f);
     char buffer[23];
-    snprintf(buffer, 50, "%d/3 posicoes corretas", correctPlacementsCount); 
+    snprintf(buffer, 50, "%ld/3 posicoes corretas", correctPlacementsCount); 
     TextRendering_PrintString(window.getNativeWindow(), buffer, -0.95f, 0.85f, 0.6f);
 
     TextRendering_PrintString(window.getNativeWindow(), "Objetivo: posicionar os cubos nas cores correspondentes", -0.95f, 0.80f, 0.6f);

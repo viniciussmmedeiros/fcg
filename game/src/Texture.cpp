@@ -4,8 +4,6 @@
 #include <stb_image.h>
 
 void Texture::LoadTextureImage(const char* filename, const GLuint numLoadedTextures) {
-    printf("Carregando imagem \"%s\"... ", filename);
-
     // Primeiro fazemos a leitura da imagem do disco
     stbi_set_flip_vertically_on_load(true);
     int width;
@@ -18,8 +16,6 @@ void Texture::LoadTextureImage(const char* filename, const GLuint numLoadedTextu
         fprintf(stderr, "ERROR: Cannot open image file \"%s\".\n", filename);
         std::exit(EXIT_FAILURE);
     }
-
-    printf("OK (%dx%d).\n", width, height);
 
     this->textureUnit = numLoadedTextures;
 

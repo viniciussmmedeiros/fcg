@@ -40,7 +40,8 @@ class Game {
 
         std::vector<bool> boxInPlace;
         bool gameWon = false;
-        int correctPlacementsCount = 0;
+        // long unsigned int, pois sendo 'int' o compilador gera warning na comparação com boxPositions.size()
+        long unsigned int correctPlacementsCount = 0;
         void renderWinMessage();
         
         // Se o usuário pressionou o botão esquerdo do mouse, guardamos a
