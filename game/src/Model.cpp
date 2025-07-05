@@ -2,25 +2,27 @@
 #include <stdexcept>
 #include <iostream>
 
-
 using namespace std;
 
 Model::Model(const string& path) {
-    // essa parte é equivalente ao "ObjModel xpto("../../data/xpto.obj");" do lab
+    // FONTE: laboratórios. Esse trecho é equivalente ao funcionamento do ObjModel do lab.
     tinyobj::attrib_t attrib;
     vector<tinyobj::shape_t> shapes;
     vector<tinyobj::material_t> materials;
     string warn, err;
 
+    // carrega o objeto usando a lib tinyobjloader
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str())) {
         throw runtime_error(warn + err);
     }
 
+    // FONTE: laboratórios. Esse trecho é equivalente à função 'ComputeNormals'.
     size_t num_vertices = attrib.vertices.size() / 3;
 
     std::vector<int> num_triangles_per_vertex(num_vertices, 0);
     std::vector<glm::vec4> vertex_normals(num_vertices, glm::vec4(0.0f,0.0f,0.0f,0.0f));
 
+    // computa a normal para cada triângulo em cada 'shape'
     for (size_t shape = 0; shape < shapes.size(); ++shape)
     {
         size_t num_triangles = shapes[shape].mesh.num_face_vertices.size();
@@ -69,7 +71,7 @@ Model::Model(const string& path) {
         attrib.normals[3*i + 2] = n.z;
     }    
 
-    // essa parte é equivalente ao 'BuildTrianglesAndAddToVirtualScene(&xpto)' do lab
+    // FONTE: laboratórios. Esse trecho é equivalente a função 'BuildTrianglesAndAddToVirtualScene'.
     GLuint vertex_array_object_id;
     glGenVertexArrays(1, &vertex_array_object_id);
     glBindVertexArray(vertex_array_object_id);
@@ -193,34 +195,22 @@ Model::Model(const string& path) {
     GLuint indices_id;
     glGenBuffers(1, &indices_id);
 
-    // "Ligamos" o buffer. Note que o tipo agora é GL_ELEMENT_ARRAY_BUFFER.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(GLuint), indices.data());
 
-    // "Desligamos" o VAO, evitando assim que operações posteriores venham a
-    // alterar o mesmo. Isso evita bugs.
     glBindVertexArray(0);    
 }
 
 void Model::draw(const char* object_name, GLint g_bbox_min_uniform, GLint g_bbox_max_uniform) {
-    // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
-    // vértices apontados pelo VAO criado pela função BuildTrianglesAndAddToVirtualScene(). Veja
-    // comentários detalhados dentro da definição de BuildTrianglesAndAddToVirtualScene().
+    // FONTE: laboratórios. Trecho extraído da função 'DrawVirtualObject'.
     glBindVertexArray(g_VirtualScene[object_name].vertex_array_object_id);
 
-    // Setamos as variáveis "bbox_min" e "bbox_max" do fragment shader
-    // com os parâmetros da axis-aligned bounding box (AABB) do modelo.
     glm::vec3 bbox_min = g_VirtualScene[object_name].bbox_min;
     glm::vec3 bbox_max = g_VirtualScene[object_name].bbox_max;
     glUniform4f(g_bbox_min_uniform, bbox_min.x, bbox_min.y, bbox_min.z, 1.0f);
     glUniform4f(g_bbox_max_uniform, bbox_max.x, bbox_max.y, bbox_max.z, 1.0f);
 
-    // Pedimos para a GPU rasterizar os vértices dos eixos XYZ
-    // apontados pelo VAO como linhas. Veja a definição de
-    // g_VirtualScene[""] dentro da função BuildTrianglesAndAddToVirtualScene(), e veja
-    // a documentação da função glDrawElements() em
-    // http://docs.gl/gl3/glDrawElements.
     glDrawElements(
         g_VirtualScene[object_name].rendering_mode,
         g_VirtualScene[object_name].num_indices,
@@ -228,7 +218,5 @@ void Model::draw(const char* object_name, GLint g_bbox_min_uniform, GLint g_bbox
         (void*)(g_VirtualScene[object_name].first_index * sizeof(GLuint))
     );
 
-    // "Desligamos" o VAO, evitando assim que operações posteriores venham a
-    // alterar o mesmo. Isso evita bugs.
     glBindVertexArray(0);
 }

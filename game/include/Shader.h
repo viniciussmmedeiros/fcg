@@ -5,21 +5,22 @@
 #include <glm/gtc/type_ptr.hpp>
 
 class Shader {
-public:
-    Shader(const std::string& vertexPath, const std::string& fragmentPath);
+    public:
+        Shader(const std::string& vertexPath, const std::string& fragmentPath);
 
-    void use() const;
-    void setMat4(const std::string& name, const glm::mat4& mat);
-    void setInt(const std::string& name, int value);
-    void setVec3(const std::string& name, const glm::vec3& vec);
-    void setVec4(const std::string& name, const glm::vec4& vec);
+        void use();
+        
+        void setMat4(const std::string& name, const glm::mat4& mat);
+        void setInt(const std::string& name, int value);
+        void setVec3(const std::string& name, const glm::vec3& vec);
+        void setVec4(const std::string& name, const glm::vec4& vec);
 
-    GLint getBBoxMinUniform() const;
-    GLint getBBoxMaxUniform() const;
-private:
-    GLuint program_id;
-    mutable GLint g_bbox_min_uniform;
-    mutable GLint g_bbox_max_uniform;
-    static std::string readFile(const std::string& path);
-    static GLuint compileShader(const std::string& source, GLenum type);
+        GLint getBBoxMinUniform();
+        GLint getBBoxMaxUniform();
+    private:
+        GLuint program_id;
+        mutable GLint g_bbox_min_uniform;
+        mutable GLint g_bbox_max_uniform;
+        static std::string readFile(const std::string& path);
+        static GLuint compileShader(const std::string& source, GLenum type);
 };

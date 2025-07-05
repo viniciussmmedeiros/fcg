@@ -1,4 +1,4 @@
-#pragma once // para evitar erros de 'redeclaração'
+#pragma once // para evitar erros de redeclaração
 #include <glm/mat4x4.hpp>
 #include <glm/vec4.hpp>
 #include "matrices.h"
@@ -6,51 +6,54 @@
 
 class Camera {
     public:
-        Camera();
+        Camera(); // construtor default.
 
+        // lida com o movimento do mouse para atualizar os ângulos da câmera.
         void cursorPosCallback(double dx, double dy);
-        void scrollCallback(double yoffset);
 
+        // retorna a matriz de visualização atual da câmera (em coordenadas da câmera).
         glm::mat4 getVirtualCamera();
+        
+        // retorna se a câmera está no modo 'livre' ou não.
         bool getUseFreeCamera();
-        glm::mat4 getProjectionMatrix(float screenRatio) const;
+        
+        // retorna a matriz de projeção conforme a proporção da tela.
+        glm::mat4 getProjectionMatrix(float screenRatio);
 
-        void setFreeCamera(bool useFreeCameraMode) {
+        // retorna o 'viewVector', usado para computar a câmera livre em relação a vaca.
+        glm::vec4 getCameraViewVector() {
+            return cameraViewVector;
+        }
+
+        // atualiza o modo da câmera para 'free' ou não.
+        void setUseFreeCamera(bool useFreeCameraMode) {
             useFreeCamera = useFreeCameraMode;
         }
 
-        void setFreeCameraPosition(glm::vec4 position) {
-            freeCameraPosition = position;
-        }
-
-        glm::vec4 getFreeCameraPosition() {
-            return freeCameraPosition;
-        }
-
-        glm::vec4 getCameraViewVector() {
-            return camera_view_vector;
-        }
-
+        // retorna o ângulo theta da câmera, usado para rotacionar o modelo na vaca.
         float getFreeCameraTheta() {
             return freeCameraTheta;
         }
 
+        // atualiza a posição da câmera livre conforme a posição da vaca.
+        void setFreeCameraPosition(glm::vec4 position) {
+            freeCameraPosition = position;
+        }
+
     private:
-        void init();
+        bool useFreeCamera = true; // iniciamos sempre em modo 'free camera'.
         
+        // FONTE: valores usados no lab 2 para implementação das coordenadas esféricas da câmera.
         float lookatCameraTheta = 0.0f;
         float lookatCameraPhi = 0.0f;
         float lookatCameraDistance = 2.5f;
-
-        bool useFreeCamera = true;
         
         float freeCameraTheta = 4.141592f;
         float freeCameraPhi = 0.0f;
         float freeCameraDistance = 2.5f;
-        glm::vec4 freeCameraPosition = glm::vec4(2.0f, 1.0f, 2.0f, 1.0f);
-
         float freeX = cos(freeCameraPhi) * sin(freeCameraTheta);
         float freeY = -sin(freeCameraPhi);
         float freeZ = cos(freeCameraPhi) * cos(freeCameraTheta);
-        glm::vec4 camera_view_vector = glm::vec4(freeX, freeY, freeZ, 0.0f);
+        glm::vec4 freeCameraPosition = glm::vec4(2.0f, 1.0f, 2.0f, 1.0f);
+        glm::vec4 cameraViewVector = glm::vec4(freeX, freeY, freeZ, 0.0f);
 };

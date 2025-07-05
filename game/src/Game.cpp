@@ -362,7 +362,7 @@ void Game::processCowMovement(float deltaTime) {
     camera.setFreeCameraPosition(new_camera_pos);
 
     if (keyPressed[GLFW_KEY_V]) {
-        camera.setFreeCamera(!camera.getUseFreeCamera());
+        camera.setUseFreeCamera(!camera.getUseFreeCamera());
     }
 
     // Velocidade da vaca em unidades por segundo
@@ -407,63 +407,6 @@ void Game::processCowMovement(float deltaTime) {
     if (keyPressed[GLFW_KEY_H]) {
         showInfoText = !showInfoText;
         keyPressed[GLFW_KEY_H] = false;
-    }
-
-    float speed = 3.0f;
-    glm::vec4 vector_u = crossproduct(glm::vec4(0.0f,1.0f,0.0f,0.0f), camera.getCameraViewVector());
-    vector_u = normalize(vector_u);
-
-    glm::vec3 cameraBoxMin = glm::vec3(-0.2f, 0.0f, -0.2f);
-    glm::vec3 cameraBoxMax = glm::vec3( 0.2f, 1.7f,  0.2f);
-
-    glm::vec4 currentCameraPos = camera.getFreeCameraPosition();
-
-    if (keyPressed[GLFW_KEY_T]) {
-        glm::vec4 newCameraPos = currentCameraPos + speed * deltaTime * camera.getCameraViewVector();
-        Collisions::AABB cameraBox = {
-            glm::vec3(newCameraPos) + cameraBoxMin,
-            glm::vec3(newCameraPos) + cameraBoxMax
-        };
-
-        if (!Collisions::CheckCowCollisionWithWorld(cameraBox, worldObstacles)) {
-            camera.setFreeCameraPosition(newCameraPos);
-        }
-    }
-
-    if (keyPressed[GLFW_KEY_Y]) {
-        glm::vec4 newCameraPos = currentCameraPos - speed * deltaTime * camera.getCameraViewVector();
-        Collisions::AABB cameraBox = {
-            glm::vec3(newCameraPos) + cameraBoxMin,
-            glm::vec3(newCameraPos) + cameraBoxMax
-        };
-
-        if (!Collisions::CheckCowCollisionWithWorld(cameraBox, worldObstacles)) {
-            camera.setFreeCameraPosition(newCameraPos);
-        }
-    }
-
-    if (keyPressed[GLFW_KEY_U]) {
-        glm::vec4 newCameraPos = currentCameraPos + speed * deltaTime * vector_u;
-        Collisions::AABB cameraBox = {
-            glm::vec3(newCameraPos) + cameraBoxMin,
-            glm::vec3(newCameraPos) + cameraBoxMax
-        };
-
-        if (!Collisions::CheckCowCollisionWithWorld(cameraBox, worldObstacles)) {
-            camera.setFreeCameraPosition(newCameraPos);
-        }
-    }
-
-    if (keyPressed[GLFW_KEY_I]) {
-        glm::vec4 newCameraPos = currentCameraPos - speed * deltaTime * vector_u;
-        Collisions::AABB cameraBox = {
-            glm::vec3(newCameraPos) + cameraBoxMin,
-            glm::vec3(newCameraPos) + cameraBoxMax
-        };
-
-        if (!Collisions::CheckCowCollisionWithWorld(cameraBox, worldObstacles)) {
-            camera.setFreeCameraPosition(newCameraPos);
-        }
     }
 }
 

@@ -7,5 +7,4 @@ class Input {
         static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod);
         static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mod);
         static void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
-        static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 };

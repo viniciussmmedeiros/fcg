@@ -13,6 +13,7 @@ Shader::Shader(const string& vertexPath, const string& fragmentPath) {
     GLuint vertexShader = compileShader(vertexCode, GL_VERTEX_SHADER);
     GLuint fragmentShader = compileShader(fragmentCode, GL_FRAGMENT_SHADER);
 
+    // FONTE: laboratórios. Trecho equivalente à função 'CreateGpuProgram'.
     program_id = glCreateProgram();
     glAttachShader(program_id, vertexShader);
     glAttachShader(program_id, fragmentShader);
@@ -32,18 +33,18 @@ Shader::Shader(const string& vertexPath, const string& fragmentPath) {
     glDeleteShader(fragmentShader);
 }
 
-void Shader::use() const {
+void Shader::use() {
     g_bbox_min_uniform = glGetUniformLocation(program_id, "bbox_min");
     g_bbox_max_uniform = glGetUniformLocation(program_id, "bbox_max");
 
     glUseProgram(program_id);
 }
 
-GLint Shader::getBBoxMinUniform() const {
+GLint Shader::getBBoxMinUniform() {
     return g_bbox_min_uniform;
 }
 
-GLint Shader::getBBoxMaxUniform() const {
+GLint Shader::getBBoxMaxUniform() {
     return g_bbox_max_uniform;
 }
 
@@ -64,6 +65,7 @@ void Shader::setVec3(const std::string& name, const glm::vec3& vec) {
 }
 
 string Shader::readFile(const string& path) {
+    // FONTE: laboratório. Trecho equivalente ao início da função 'LoadShader'.
     ifstream file(path);
     if (!file.is_open()) {
         throw runtime_error("Failed to open shader file: " + path);
@@ -74,6 +76,7 @@ string Shader::readFile(const string& path) {
 }
 
 GLuint Shader::compileShader(const string& source, GLenum type) {
+    // FONTE: laboratório. Trecho equivalente à função 'LoadShader' e 'LoadShader_Fragment'.
     GLuint shader = glCreateShader(type);
     const char* src = source.c_str();
     glShaderSource(shader, 1, &src, NULL);
