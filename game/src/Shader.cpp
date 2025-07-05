@@ -7,13 +7,16 @@
 using namespace std;
 
 Shader::Shader(const string& vertexPath, const string& fragmentPath) {
+    // leitura dos arquivos .glsl
     string vertexCode = readFile(vertexPath);
     string fragmentCode = readFile(fragmentPath);
 
+    // envia os arquivos glsl lidos para a gpu
     GLuint vertexShader = compileShader(vertexCode, GL_VERTEX_SHADER);
     GLuint fragmentShader = compileShader(fragmentCode, GL_FRAGMENT_SHADER);
 
     // FONTE: laboratórios. Trecho equivalente à função 'CreateGpuProgram'.
+    // criamos um programa na gpu e linkamos os glsl lidos e 'compilados' neles  
     program_id = glCreateProgram();
     glAttachShader(program_id, vertexShader);
     glAttachShader(program_id, fragmentShader);
@@ -29,11 +32,13 @@ Shader::Shader(const string& vertexPath, const string& fragmentPath) {
         throw runtime_error("Shader Linking Failed: " + string(infoLog.data()));
     }
 
+    // após linkarmos os shaders, os objetos lidos e 'compilados' podem ser descartados
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 }
 
 void Shader::use() {
+    // salvamos as localizações de bbox para uso posterior
     g_bbox_min_uniform = glGetUniformLocation(program_id, "bbox_min");
     g_bbox_max_uniform = glGetUniformLocation(program_id, "bbox_max");
 
@@ -48,6 +53,10 @@ GLint Shader::getBBoxMaxUniform() {
     return g_bbox_max_uniform;
 }
 
+// para as funções de setters basicamente buscamos a localização
+// de uma variável dentro do shader pelo nome, e usamos glUniform
+// para enviar o dado do argumento (mar, value, vec...) para
+// a localização desejada na gpu.
 void Shader::setMat4(const string& name, const glm::mat4& mat) {
     glUniformMatrix4fv(glGetUniformLocation(program_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }

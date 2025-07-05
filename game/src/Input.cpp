@@ -2,8 +2,10 @@
 #include "Game.h"
 
 void Input::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod) {
+    // em game.cpp setamos o pointer como o game, aqui "pegamos de volta" fazendo um cast
     Game* game = static_cast<Game*>(glfwGetWindowUserPointer(window));
     if (game) {
+        // agora que temos de volta o ponteiro para game, chamamos o método apropriado, passando os dados do evento
         game->handleKeyCallback(key, scancode, action, mod);
     }
 }

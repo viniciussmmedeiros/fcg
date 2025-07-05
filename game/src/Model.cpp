@@ -11,7 +11,7 @@ Model::Model(const string& path) {
     vector<tinyobj::material_t> materials;
     string warn, err;
 
-    // carrega o objeto usando a lib tinyobjloader
+    // carrega o objeto usando a lib tinyobjloader, populando as variáveis attrib, shapes e materials
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str())) {
         throw runtime_error(warn + err);
     }

@@ -4,6 +4,7 @@
 
 class Input {
     public:
+        // métodos estáticos, para não precisamos instanciar a classe
         static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod);
         static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mod);
         static void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);

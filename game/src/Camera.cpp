@@ -36,7 +36,6 @@ void Camera::cursorPosCallback(double dx, double dy) {
 
 glm::mat4 Camera::getVirtualCamera() {
     // FONTE: laboratórios. Cálculo da posição da câmera utilizando as coordenadas esféricas.
-    
     glm::vec4 cameraUpVector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
 
     // câmera look-at, olhando para a origem.
