@@ -23,7 +23,7 @@ uniform mat4 projection;
 
 // Identificador que define qual objeto está sendo desenhado no momento
 #define SPHERE 0
-#define BUNNY  1
+#define FRONT_BACK_WALL  1
 #define PLANE  2
 #define COW    3
 #define FLOOR 4
@@ -96,11 +96,11 @@ void main()
 
         color.rgb = lambert_diffuse_term + ambient_term + phong_specular_term + minimum_lighting * object_game_color;
     }
-    else if ( object_id == BUNNY || object_id == COW )
+    else if ( object_id == FRONT_BACK_WALL || object_id == COW )
     {
-        // ILUMINAÇÃO PHONG PARA BUNNY/COW
+        // ILUMINAÇÃO PHONG PARA FRONT_BACK_WALL/COW
         
-        // Projeção planar para bunny/cow
+        // Projeção planar para FRONT_BACK_WALL/cow
         float minx = bbox_min.x;
         float maxx = bbox_max.x;
         float miny = bbox_min.y;

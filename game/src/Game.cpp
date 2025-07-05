@@ -64,8 +64,6 @@ void Game::init() {
         textures["earth"]->LoadTextureImage("../../data/tc-earth_daymap_surface.jpg", g_NumLoadedTextures++);
         textures["cow"] = std::unique_ptr<Texture>(new Texture());
         textures["cow"]->LoadTextureImage("../../data/cow_surface.jpg", g_NumLoadedTextures++);
-        textures["bunny"] = std::unique_ptr<Texture>(new Texture());
-        textures["bunny"]->LoadTextureImage("../../data/bunny_surface.jpg", g_NumLoadedTextures++);
         textures["ceiling"] = std::unique_ptr<Texture>(new Texture());
         textures["ceiling"]->LoadTextureImage("../../data/ceiling_surface.jpg", g_NumLoadedTextures++);
         textures["floor"] = std::unique_ptr<Texture>(new Texture());
@@ -76,7 +74,6 @@ void Game::init() {
         textures["box"]->LoadTextureImage("../../data/box_surface.jpg", g_NumLoadedTextures);
 
         models["sphere"].reset(new Model("../../data/sphere.obj"));
-        models["bunny"].reset(new Model("../../data/bunny.obj"));
         models["plane"].reset(new Model("../../data/plane.obj"));
         models["cow"].reset(new Model("../../data/cow.obj"));
         models["cube"].reset(new Model("../../data/cube.obj"));

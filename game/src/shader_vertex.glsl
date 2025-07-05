@@ -14,7 +14,6 @@ uniform int object_id;
 
 // Identificadores para diferentes tipos de objeto
 #define SPHERE 0
-#define BUNNY  1
 #define PLANE  2
 #define COW    3
 #define FLOOR 4
