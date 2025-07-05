@@ -7,6 +7,9 @@
 
 using namespace std;
 
+Game::Game() : window(800, 800, "Empurra Vaca!") {
+    init();
+}
 
 glm::vec3 bezierCubic(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, float t) {
     return float(std::pow(1 - t, 3)) * p0 +
@@ -15,13 +18,7 @@ glm::vec3 bezierCubic(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, fl
            float(std::pow(t, 3)) * p3;
 }
 
-// Quando um objeto de 'Game' é criado, ele também cria um objeto
-// de 'Window' para o membro 'window'
-Game::Game() : window(800, 800, "Escape da Vaca") {
-    init();
-}
-
-// Número de texturas carregadas pela função LoadTextureImage()
+// FONTE: Laboratórios - Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
 
 void Game::init() {
@@ -33,22 +30,16 @@ void Game::init() {
 
     cowPosition = glm::vec3(0.0f, -0.4f, 0.0f);
 
-    // Inicializar parâmetros da animação da esfera
+    // Definições da curva de Bézier
     sphereAnimationTime = 0.0f;
-    sphereAnimationDuration = 5.0f; // 5 segundos para completar a curva
+    sphereAnimationDuration = 5.0f;
     
-    // Definir pontos de controle da curva de Bézier para a esfera
-    // sphereBezierP0 = glm::vec3(-3.0f, 2.0f, -3.0f);  // ponto inicial
-    // sphereBezierP1 = glm::vec3(-1.0f, 4.0f, 1.0f);   // primeiro ponto de controle
-    // sphereBezierP2 = glm::vec3(1.0f, 3.0f, -1.0f);   // segundo ponto de controle
-    // sphereBezierP3 = glm::vec3(3.0f, 1.0f, 3.0f);    // ponto final
-
     sphereBezierP0 = glm::vec3(-3.0f, 0.5f, -3.0f);
     sphereBezierP1 = glm::vec3(-1.0f, 1.5f, 3.0f);
     sphereBezierP2 = glm::vec3(1.0f, 1.5f, -3.0f);
     sphereBezierP3 = glm::vec3(3.0f, 0.5f, 3.0f);
 
-    // Inicializar posições das caixas
+    // Posição inicial das caixas
     boxPositions = {
         glm::vec3(2.0f, -0.4f, 2.0f),
         glm::vec3(-2.0f, -0.4f, -2.0f),
@@ -59,11 +50,14 @@ void Game::init() {
     boxColors.push_back(glm::vec3(1.0f, 0.2f, 0.2f));
     boxColors.push_back(glm::vec3(0.2f, 1.0f, 0.2f));
     boxColors.push_back(glm::vec3(0.2f, 0.2f, 1.0f));
+
     tilePositions.push_back(glm::vec3(4.0f, -0.99f, 4.0f));
     tilePositions.push_back(glm::vec3(-4.0f, -0.99f, 4.0f));
     tilePositions.push_back(glm::vec3(0.0f, -0.99f, -4.0f));
 
     try {
+        // FONTE: Laboratórios
+
         shader.reset(new Shader("../../src/shader_vertex.glsl", "../../src/shader_fragment.glsl"));
 
         textures["earth"] = std::unique_ptr<Texture>(new Texture());
@@ -90,10 +84,10 @@ void Game::init() {
         fprintf(stderr, "Error opening data resources \"%s\".\n", e.what());
     }
 
-    // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
+    // FONTE - Laboratórios: Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
     glEnable(GL_DEPTH_TEST);
 
-    // Habilitamos o Backface Culling. Veja slides 8-13 do documento Aula_02_Fundamentos_Matematicos.pdf, slides 23-34 do documento Aula_13_Clipping_and_Culling.pdf e slides 112-123 do documento Aula_14_Laboratorio_3_Revisao.pdf.
+    // FONTE - Habilitamos o Backface Culling. Veja slides 8-13 do documento Aula_02_Fundamentos_Matematicos.pdf, slides 23-34 do documento Aula_13_Clipping_and_Culling.pdf e slides 112-123 do documento Aula_14_Laboratorio_3_Revisao.pdf.
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
@@ -106,8 +100,9 @@ void Game::run() {
 
     while (!window.shouldClose()) {
         float currentFrameT = glfwGetTime();
+        
         float deltaT = currentFrameT - lastFrameT;
-        // usar deltaT para fazer as atualizações no jogo, animações etc
+        
         lastFrameT = currentFrameT;
 
         processCowMovement(deltaT);
@@ -119,14 +114,14 @@ void Game::run() {
         renderPermanentText();
         renderFPS(); 
         renderWinMessage();
-        window.swapBuffers(); // atualiza a tela
-        glfwPollEvents(); // processa eventos tipo input
+
+        window.swapBuffers();
+        glfwPollEvents();
     }
 }
 
 void Game::render() {
-    //printf("\n[TESTES]\n\tT Y U I -> movimentam a câmera livre\n\tW A S D -> movimentam a vaca\n\tV -> troca entre câmera livre e look-at\n");
-    // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
+    // FONTE: Laboratórios - Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
     // definida como coeficientes RGBA: Red, Green, Blue, Alpha; isto é:
     // Vermelho, Verde, Azul, Alpha (valor de transparência).
     // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
@@ -148,11 +143,9 @@ void Game::render() {
 
     GLint g_bbox_min_uniform = shader->getBBoxMinUniform();
     GLint g_bbox_max_uniform = shader->getBBoxMaxUniform();
-    // desenha a esfera com posição da curva de Bézier
     textures["earth"]->bind();
     shader->setInt("TextureImage0", textures["earth"]->getTextureUnit());
     
-    // Calcular posição atual na curva de Bézier
     float t = sphereAnimationTime / sphereAnimationDuration;
     t = fmod(t, 1.0f); // garantir que t permaneça entre 0 e 1
     glm::vec3 testPoint = glm::vec3(0.20f, 1.25f, 0.0f);
@@ -174,7 +167,6 @@ void Game::render() {
     // desenha a vaca
     textures["cow"]->bind();
     shader->setInt("TextureImage0", textures["cow"]->getTextureUnit());
-    // modelMatrix = Matrix_Translate(cowPosition.x, cowPosition.y, cowPosition.z);
     modelMatrix = Matrix_Translate(cowPosition.x, cowPosition.y, cowPosition.z) * cowOrientation;
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 3);
@@ -190,83 +182,73 @@ void Game::render() {
     models["plane"]->draw("the_plane", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["floor"]->unbind();
 
-    float wallThickness = 0.2f;
-    float wallHeight = 3.0f;
-    float roomSize = 10.0f;
-
     // Parede esquerda
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(-roomSize / 2.0f - 0.1f, wallHeight / 2.0f - 1.0f, 0.0f) 
-            * Matrix_Scale(wallThickness, wallHeight, roomSize);
-
+    modelMatrix = Matrix_Translate(-5.1, 0.5f, 0.0f) 
+            * Matrix_Scale(0.2f, 3.0f, 10.0f);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 5);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["wall"]->unbind();
 
     worldObstacles.push_back({
-        glm::vec3(-roomSize/2.0f - wallThickness/2.0f, -1.0f, -roomSize/2.0f),
-        glm::vec3(-roomSize/2.0f + wallThickness/2.0f, wallHeight-1.0f, roomSize/2.0f)
+        glm::vec3(-5.1f, -1.0f, -5.0f),
+        glm::vec3(-4.9f, 2.0f, 5.0f)
     });
 
     // Parede direita
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(roomSize / 2.0f + 0.1f, wallHeight / 2.0f - 1.0f, 0.0f) 
-        * Matrix_Scale(wallThickness, wallHeight, roomSize);
+    modelMatrix = Matrix_Translate(5.1f, 0.5f, 0.0f) 
+        * Matrix_Scale(0.2f, 3.0f, 10.0f);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 2);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["wall"]->unbind();
 
     worldObstacles.push_back({
-        glm::vec3(roomSize/2.0f - wallThickness/2.0f, -1.0f, -roomSize/2.0f),
-        glm::vec3(roomSize/2.0f + wallThickness/2.0f, wallHeight-1.0f, roomSize/2.0f)
+        glm::vec3(4.9f, -1.0f, -5.0f),
+        glm::vec3(5.1f, 2.0f, 5.0f)
     });
 
     // Parede frontal
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(0.0f, wallHeight / 2.0f - 1.0f, -roomSize / 2.0f - 0.1f) * Matrix_Scale(roomSize, wallHeight, wallThickness);
+    modelMatrix = Matrix_Translate(0.0f, 0.5f, -5.1f) * Matrix_Scale(10.0f, 3.0f, 0.2f);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 1);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["wall"]->unbind();
-
+    
     worldObstacles.push_back({
-        glm::vec3(-roomSize/2.0f, -1.0f, -roomSize/2.0f - wallThickness/2.0f),
-        glm::vec3(roomSize/2.0f, wallHeight-1.0f, -roomSize/2.0f + wallThickness/2.0f)
+        glm::vec3(-5.0f, -1.0f, -5.1f),
+        glm::vec3(5.0f, 2.0f, -4.9f)
     });
-
+    
     // Parede de trás
     textures["wall"]->bind();
     shader->setInt("TextureImage0", textures["wall"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(0.0f, wallHeight / 2.0f - 1.0f, roomSize / 2.0f + 0.1f) * Matrix_Scale(roomSize, wallHeight, wallThickness);
+    modelMatrix = Matrix_Translate(0.0f, 0.5f, 5.1f) * Matrix_Scale(10.0f, 3.0f, 0.2f);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 1);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["wall"]->unbind();
-
+    
     worldObstacles.push_back({
-        glm::vec3(-roomSize/2.0f, -1.0f, roomSize/2.0f - wallThickness/2.0f),
-        glm::vec3(roomSize/2.0f, wallHeight-1.0f, roomSize/2.0f + wallThickness/2.0f)
+        glm::vec3(-5.0f, -1.0f, 4.9f),
+        glm::vec3(5.0f, 2.0f, 5.1f)
     });
-
-    // Teto
-    float ceilingHeight = 3.0f;  // altura do teto (mesma que parede)
-    float ceilingThickness = 0.1f;  // espessura fina para o teto
-
+    
     textures["ceiling"]->bind();
     shader->setInt("TextureImage0", textures["ceiling"]->getTextureUnit());
-    modelMatrix = Matrix_Translate(0.0f, ceilingHeight - 1.0f, 0.0f) 
-                * Matrix_Scale(roomSize, ceilingThickness, roomSize);
+    modelMatrix = Matrix_Translate(0.0f, 2.0f, 0.0f) 
+                * Matrix_Scale(10.0f, 0.1f, 10.0f);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 6);
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["ceiling"]->unbind();
 
-    // Lista de posições para caixas na cena - agora usando as posições dinâmicas
     for (size_t i = 0; i < boxPositions.size(); ++i) {
         textures["box"]->bind();
         shader->setInt("TextureImage0", textures["box"]->getTextureUnit());
@@ -292,28 +274,25 @@ void Game::render() {
         models["plane"]->draw("the_plane", g_bbox_min_uniform, g_bbox_max_uniform);
     }
 
-    // Atualizar obstáculos do mundo dinamicamente
     worldObstacles.clear();
-    
-    // Adicionar paredes como obstáculos fixos
+   
     worldObstacles.push_back({
-        glm::vec3(-roomSize/2.0f - wallThickness/2.0f, -1.0f, -roomSize/2.0f),
-        glm::vec3(-roomSize/2.0f + wallThickness/2.0f, wallHeight-1.0f, roomSize/2.0f)
+        glm::vec3(-6.5f, -1.0f, -5.0f),
+        glm::vec3(-4.9f, 2.0f, 5.0f)
     });
     worldObstacles.push_back({
-        glm::vec3(roomSize/2.0f - wallThickness/2.0f, -1.0f, -roomSize/2.0f),
-        glm::vec3(roomSize/2.0f + wallThickness/2.0f, wallHeight-1.0f, roomSize/2.0f)
+        glm::vec3(6.5f, -1.0f, -5.0f),
+        glm::vec3(5.1f, 2.0f, 5.0f)
     });
     worldObstacles.push_back({
-        glm::vec3(-roomSize/2.0f, -1.0f, -roomSize/2.0f - wallThickness/2.0f),
-        glm::vec3(roomSize/2.0f, wallHeight-1.0f, -roomSize/2.0f + wallThickness/2.0f)
+        glm::vec3(-5.0f, -1.0f, -6.5f),
+        glm::vec3(5.0f, 2.0f, -4.9f)
     });
     worldObstacles.push_back({
-        glm::vec3(-roomSize/2.0f, -1.0f, roomSize/2.0f - wallThickness/2.0f),
-        glm::vec3(roomSize/2.0f, wallHeight-1.0f, roomSize/2.0f + wallThickness/2.0f)
+        glm::vec3(-5.0f, -1.0f, 6.5f),
+        glm::vec3(5.0f, 2.0f, 5.1f)
     });
 
-    // Adicionar caixas como obstáculos (agora usando posições dinâmicas)
     for (const auto& pos : boxPositions) {
         worldObstacles.push_back({
             pos + glm::vec3(-boxSize/2.0f, 0.0f, -boxSize/2.0f),
@@ -373,14 +352,11 @@ void Game::processCowMovement(float deltaTime) {
     
     float delta = 3.141592 / 16.0f;
     
-    // glm::mat4 cowOrientation = Matrix_Rotate_Z(cowAngleZ) *
-    //                            Matrix_Rotate_Y(cowAngleY) *
-    //                            Matrix_Rotate_X(cowAngleX);
-
     cowOrientation = Matrix_Rotate_Y(camera.getFreeCameraTheta() - M_PI / 2);
 
     glm::vec3 cowForward(1.0f, 0.0f, 0.0f); // +x é para frente
     glm::vec3 cowRight(0.0f, 0.0f, 1.0f); // +z é direita
+
     const float distance_from_cow = 2.0f;
     const float height_above_cow = 1.0f;
     glm::vec4 view_vector = camera.getCameraViewVector();
@@ -438,12 +414,10 @@ void Game::processCowMovement(float deltaTime) {
         keyPressed[GLFW_KEY_H] = false;
     }
 
-    // Velocidade da câmera em unidades por segundo
     float speed = 3.0f;
     glm::vec4 vector_u = crossproduct(glm::vec4(0.0f,1.0f,0.0f,0.0f), camera.getCameraViewVector());
     vector_u = normalize(vector_u);
 
-    // Bounding box da câmera (em relação à posição)
     glm::vec3 cameraBoxMin = glm::vec3(-0.2f, 0.0f, -0.2f);
     glm::vec3 cameraBoxMax = glm::vec3( 0.2f, 1.7f,  0.2f);
 
@@ -500,7 +474,6 @@ void Game::processCowMovement(float deltaTime) {
 
 void Game::updateSphereAnimation(float deltaTime) {
     sphereAnimationTime += deltaTime;
-    // O tempo continua crescendo, e usamos fmod na renderização para ciclar
 }
 
 bool Game::checkCowMovementAndPushBoxes(const glm::vec3& newCowPos, const glm::vec3& movementDirection) {
