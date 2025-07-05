@@ -153,8 +153,6 @@ void Game::render() {
     glm::vec3 spherePosition = bezierCubic(sphereBezierP0, sphereBezierP1, sphereBezierP2, sphereBezierP3, t);
 
     bool hitPoint = Collisions::CheckPointSphereCollision(testPoint, spherePosition, sphereRadius);
-    // printf("\nhit point: %d", hitPoint);
-    // printf("\n sphere position: (%.2f, %.2f, %.2f)\n", spherePosition.x, spherePosition.y, spherePosition.z);
     if(hitPoint) {
         shader->setVec3("object_game_color", glm::vec3(252.0f, 0, 0));
     }

@@ -64,8 +64,6 @@ GLuint Texture::getTextureUnit() const {
 }
 
 void Texture::bind() const {
-    // printf("texture id : %d\n", textureId);
-    // printf("texture unit : %d\n", textureUnit);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, textureId);
     glBindSampler(textureUnit, samplerId);

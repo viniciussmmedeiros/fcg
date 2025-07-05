@@ -14,8 +14,6 @@
 #include "utils.h"
 #include "dejavufont.h"
 
-// Add this function to textrendering.cpp
-// This function was copied from the lab's main.cpp to make this file self-contained.
 static GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id)
 {
     GLuint program_id = glCreateProgram();

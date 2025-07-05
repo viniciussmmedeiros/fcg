@@ -16,10 +16,6 @@ Model::Model(const string& path) {
         throw runtime_error(warn + err);
     }
 
-    // essa parte é equivalente ao "ComputeNormals(&xpto)" do lab
-    // if ( !attrib.normals.empty() )
-    //     return;
-
     size_t num_vertices = attrib.vertices.size() / 3;
 
     std::vector<int> num_triangles_per_vertex(num_vertices, 0);
@@ -108,7 +104,6 @@ Model::Model(const string& path) {
                 const float vx = attrib.vertices[3*idx.vertex_index + 0];
                 const float vy = attrib.vertices[3*idx.vertex_index + 1];
                 const float vz = attrib.vertices[3*idx.vertex_index + 2];
-                //printf("tri %d vert %d = (%.2f, %.2f, %.2f)\n", (int)triangle, (int)vertex, vx, vy, vz);
                 model_coefficients.push_back( vx ); // X
                 model_coefficients.push_back( vy ); // Y
                 model_coefficients.push_back( vz ); // Z
@@ -120,11 +115,6 @@ Model::Model(const string& path) {
                 bbox_max.x = std::max(bbox_max.x, vx);
                 bbox_max.y = std::max(bbox_max.y, vy);
                 bbox_max.z = std::max(bbox_max.z, vz);
-
-                // Inspecionando o código da tinyobjloader, o aluno Bernardo
-                // Sulzbach (2017/1) apontou que a maneira correta de testar se
-                // existem normais e coordenadas de textura no ObjModel é
-                // comparando se o índice retornado é -1. Fazemos isso abaixo.
 
                 if ( idx.normal_index != -1 )
                 {
@@ -207,8 +197,6 @@ Model::Model(const string& path) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(GLuint), indices.data());
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // XXX Errado!
-    //
 
     // "Desligamos" o VAO, evitando assim que operações posteriores venham a
     // alterar o mesmo. Isso evita bugs.

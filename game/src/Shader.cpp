@@ -30,10 +30,6 @@ Shader::Shader(const string& vertexPath, const string& fragmentPath) {
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
-    // glUniform1i(glGetUniformLocation(program_id, "TextureImage0"), 0);
-    // glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 1);
-    // glUniform1i(glGetUniformLocation(program_id, "TextureImage2"), 2);
 }
 
 void Shader::use() const {
