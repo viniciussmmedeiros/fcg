@@ -370,7 +370,7 @@ void Game::processCowMovement(float deltaTime) {
         glm::vec3 forwardVec = glm::vec3(cowOrientation * glm::vec4(cowForward, 0.0f));
         glm::vec3 newPos = cowPosition + forwardVec * speed_cow * deltaTime;
     
-        if (!checkCowMovementAndPushBoxes(newPos, forwardVec)) {
+        if (Collisions::CheckCowMovementAndPushBoxes(newPos, forwardVec, boxPositions, boxSize)) {
             cowPosition = newPos;
         }
     }
@@ -379,7 +379,7 @@ void Game::processCowMovement(float deltaTime) {
         glm::vec3 backwardVec = glm::vec3(cowOrientation * glm::vec4(-cowForward, 0.0f));
         glm::vec3 newPos = cowPosition + backwardVec * speed_cow * deltaTime;
         
-        if (!checkCowMovementAndPushBoxes(newPos, backwardVec)) {
+        if (Collisions::CheckCowMovementAndPushBoxes(newPos, backwardVec, boxPositions, boxSize)) {
             cowPosition = newPos;
         }
     }
@@ -388,7 +388,7 @@ void Game::processCowMovement(float deltaTime) {
         glm::vec3 leftVec = glm::vec3(cowOrientation * glm::vec4(-cowRight, 0.0f));
         glm::vec3 newPos = cowPosition + leftVec * speed_cow * deltaTime;
         
-        if (!checkCowMovementAndPushBoxes(newPos, leftVec)) {
+        if (Collisions::CheckCowMovementAndPushBoxes(newPos, leftVec, boxPositions, boxSize)) {
             cowPosition = newPos;
         }
     }
@@ -397,7 +397,7 @@ void Game::processCowMovement(float deltaTime) {
         glm::vec3 rightVec = glm::vec3(cowOrientation * glm::vec4(cowRight, 0.0f));
         glm::vec3 newPos = cowPosition + rightVec * speed_cow * deltaTime;
         
-        if (!checkCowMovementAndPushBoxes(newPos, rightVec)) {
+        if (Collisions::CheckCowMovementAndPushBoxes(newPos, rightVec, boxPositions, boxSize)) {
             cowPosition = newPos;
         }
     }
@@ -410,92 +410,6 @@ void Game::processCowMovement(float deltaTime) {
 
 void Game::updateSphereAnimation(float deltaTime) {
     sphereAnimationTime += deltaTime;
-}
-
-bool Game::checkCowMovementAndPushBoxes(const glm::vec3& newCowPos, const glm::vec3& movementDirection) {
-    Collisions::AABB newCow = {
-        newCowPos + glm::vec3(-0.8f, 0.0f, -0.3f),
-        newCowPos + glm::vec3( 0.8f, 1.2f,  0.3f)
-    };
-
-    // Verificar colisão com cada caixa
-    for (size_t i = 0; i < boxPositions.size(); ++i) {
-        Collisions::AABB box = {
-            boxPositions[i] + glm::vec3(-boxSize/2.0f, 0.0f, -boxSize/2.0f),
-            boxPositions[i] + glm::vec3(boxSize/2.0f, boxSize, boxSize/2.0f)
-        };
-
-        if (Collisions::CheckAABBCollision(newCow, box)) {
-            // Tentar empurrar a caixa com velocidade proporcional ao movimento da vaca
-            float pushDistance = 0.3f; // Distância base que a caixa será empurrada
-            glm::vec3 pushDirection = glm::normalize(movementDirection);
-            glm::vec3 newBoxPos = boxPositions[i] + pushDirection * pushDistance;
-
-            // Verificar se a nova posição da caixa é válida
-            Collisions::AABB newBox = {
-                newBoxPos + glm::vec3(-boxSize/2.0f, 0.0f, -boxSize/2.0f),
-                newBoxPos + glm::vec3(boxSize/2.0f, boxSize, boxSize/2.0f)
-            };
-
-            // Verificar colisão da caixa com paredes (apenas obstáculos fixos)
-            std::vector<Collisions::AABB> fixedObstacles = {
-                // Paredes
-                {glm::vec3(-5.1f, -1.0f, -5.0f), glm::vec3(-4.9f, 2.0f, 5.0f)}, // esquerda
-                {glm::vec3(4.9f, -1.0f, -5.0f), glm::vec3(5.1f, 2.0f, 5.0f)},   // direita
-                {glm::vec3(-5.0f, -1.0f, -5.1f), glm::vec3(5.0f, 2.0f, -4.9f)}, // frente
-                {glm::vec3(-5.0f, -1.0f, 4.9f), glm::vec3(5.0f, 2.0f, 5.1f)}    // trás
-            };
-
-            // Verificar colisão com outras caixas
-            bool canPushBox = true;
-            for (size_t j = 0; j < boxPositions.size(); ++j) {
-                if (i != j) { // Não verificar colisão consigo mesma
-                    Collisions::AABB otherBox = {
-                        boxPositions[j] + glm::vec3(-boxSize/2.0f, 0.0f, -boxSize/2.0f),
-                        boxPositions[j] + glm::vec3(boxSize/2.0f, boxSize, boxSize/2.0f)
-                    };
-                    if (Collisions::CheckAABBCollision(newBox, otherBox)) {
-                        canPushBox = false;
-                        break;
-                    }
-                }
-            }
-
-            // Verificar colisão com paredes
-            if (canPushBox) {
-                for (const auto& obstacle : fixedObstacles) {
-                    if (Collisions::CheckAABBCollision(newBox, obstacle)) {
-                        canPushBox = false;
-                        break;
-                    }
-                }
-            }
-
-            if (canPushBox) {
-                // Empurrar a caixa
-                boxPositions[i] = newBoxPos;
-                return false; // Movimento da vaca permitido
-            } else {
-                return true; // Movimento da vaca bloqueado
-            }
-        }
-    }
-
-    // Verificar colisão com obstáculos fixos (paredes)
-    std::vector<Collisions::AABB> fixedObstacles = {
-        {glm::vec3(-5.1f, -1.0f, -5.0f), glm::vec3(-4.9f, 2.0f, 5.0f)},
-        {glm::vec3(4.9f, -1.0f, -5.0f), glm::vec3(5.1f, 2.0f, 5.0f)},
-        {glm::vec3(-5.0f, -1.0f, -5.1f), glm::vec3(5.0f, 2.0f, -4.9f)},
-        {glm::vec3(-5.0f, -1.0f, 4.9f), glm::vec3(5.0f, 2.0f, 5.1f)}
-    };
-
-    for (const auto& obstacle : fixedObstacles) {
-        if (Collisions::CheckAABBCollision(newCow, obstacle)) {
-            return true; // Movimento bloqueado por parede
-        }
-    }
-
-    return false; // Movimento permitido
 }
 
 void Game::renderPermanentText() {
@@ -553,25 +467,17 @@ void Game::updateGameState() {
     float tile_size = 0.8f;
 
     for (size_t i = 0; i < boxPositions.size(); ++i) {
-        Collisions::AABB box_aabb = {
-            boxPositions[i] + glm::vec3(-boxSize / 2.0f, 0.0f, -boxSize / 2.0f),
-            boxPositions[i] + glm::vec3(boxSize / 2.0f, boxSize, boxSize / 2.0f)
-        };
-        Collisions::AABB tile_aabb = {
-            tilePositions[i] + glm::vec3(-tile_size, -0.02f, -tile_size),
-            tilePositions[i] + glm::vec3(tile_size, 0.02f, tile_size)
-        };
+        Collisions::AABB box_aabb = Collisions::CreateBoxAABB(boxPositions[i], boxSize);
+        Collisions::AABB tile_aabb = Collisions::CreateCeilingAABB(tilePositions[i], tile_size);
 
-        bool x_overlap = (box_aabb.min.x <= tile_aabb.max.x && box_aabb.max.x >= tile_aabb.min.x);
-        bool z_overlap = (box_aabb.min.z <= tile_aabb.max.z && box_aabb.max.z >= tile_aabb.min.z);
-
-        if (x_overlap && z_overlap) {
+        if (Collisions::CheckBoxPlacement(box_aabb, tile_aabb)) {
             boxInPlace[i] = true;
             correctPlacementsCount++;
         } else {
             boxInPlace[i] = false;
         }
     }
+    
     if (correctPlacementsCount == boxPositions.size()) {
         gameWon = true;
     }
