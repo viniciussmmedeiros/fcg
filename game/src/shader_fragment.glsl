@@ -80,7 +80,7 @@ void main()
         vec4 n = normalize(normal);
         vec4 l = normalize(vec4(0.0,1.0,0.5,0.0));
         vec4 v = normalize(camera_position - p);
-        vec4 r_reflect = -l + 2 * n * dot(n,l);
+        vec4 h = normalize(l + v);
 
         // Propriedades da esfera
         vec3 Kd = texture(TextureImage0, vec2(U,V)).rgb;
@@ -93,10 +93,10 @@ void main()
 
         vec3 lambert_diffuse_term = Kd * I * max(0,dot(n,l));
         vec3 ambient_term = Ka * Ia;
-        vec3 phong_specular_term = Ks * I * pow(max(0, dot(r_reflect,v)), q);
+        vec3 blinn_phong_specular_term = Ks * I * pow(max(0, dot(n,h)), q);
         vec3 minimum_lighting = Kd * 0.2;
 
-        color.rgb = lambert_diffuse_term + ambient_term + phong_specular_term + minimum_lighting * object_game_color;
+        color.rgb = lambert_diffuse_term + ambient_term + blinn_phong_specular_term + minimum_lighting * object_game_color;
     }
     else if ( object_id == FRONT_BACK_WALL || object_id == COW )
     {
@@ -118,7 +118,7 @@ void main()
         vec4 n = normalize(normal);
         vec4 l = normalize(vec4(0.0,1.0,0.5,0.0));
         vec4 v = normalize(camera_position - p);
-        vec4 r_reflect = -l + 2 * n * dot(n,l);
+        vec4 h = normalize(l + v);
 
         vec3 Kd = texture(TextureImage0, vec2(U,V)).rgb;
         vec3 Ks = vec3(0.2,0.2,0.2);
@@ -130,10 +130,11 @@ void main()
 
         vec3 lambert_diffuse_term = Kd * I * max(0,dot(n,l));
         vec3 ambient_term = Ka * Ia;
-        vec3 phong_specular_term = Ks * I * pow(max(0, dot(r_reflect,v)), q);
+        // FONTE: slide 150, modelos de iluminação
+        vec3 blinn_phong_specular_term = Ks * I * pow(max(0, dot(n,h)), q);
         vec3 minimum_lighting = Kd * 0.2;
 
-        color.rgb = lambert_diffuse_term + ambient_term + phong_specular_term + minimum_lighting;
+        color.rgb = lambert_diffuse_term + ambient_term + blinn_phong_specular_term + minimum_lighting;
     }
     else if ( 
         object_id == PLANE || object_id == FLOOR || object_id == WALL || object_id == CEILING || object_id == BOX )
