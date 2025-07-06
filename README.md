@@ -17,11 +17,12 @@
 
 **Vinicius:**  
 - Início do core do projeto  
-- Finalização do mapeamento de texturas  
-- Implementação das câmeras (livre e look-at)  
+- Fluxo de bind e unbind para uso de texturas
+- Implementação das câmeras (livre e look-at)
 - Transformações geométricas controladas pelo usuário  
 - Lógica do jogo (caixas coloridas em áreas específicas)  
-- Escrita dos textos com auxílio  
+- Escrita dos textos na tela
+- Teste de colisão ponto-esfera
 
 **Ambos:**  
 - Colaboração na integração das funcionalidades  
@@ -32,6 +33,7 @@
 ### Uso de ferramentas de IA
 
 Utilizamos a ferramenta **GitHub Copilot**, integrada ao VSCode, como apoio para dúvidas de código.  A IA foi particularmente útil em tarefas repetitivas ou padronizadas, como a construção do cenário e definição de estruturas auxiliares.  As decisões de implementação e entendimento dos conceitos foram sempre conduzidas por nós.
+A ferramenta **Gemini** também foi útil para integração da lógica dos métodos estáticos da classe Input e também na lógica de colisão das caixas com os pisos coloridos.
 
 ---
 
