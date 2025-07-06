@@ -50,6 +50,8 @@ out vec4 color;
 #define M_PI   3.14159265358979323846
 #define M_PI_2 1.57079632679489661923
 
+// FONTE: BASEADO NO LABORATÓRIO 4 E 5
+
 void main()
 {
     // Coordenadas de textura U e V
@@ -135,10 +137,7 @@ void main()
     }
     else if ( 
         object_id == PLANE || object_id == FLOOR || object_id == WALL || object_id == CEILING || object_id == BOX )
-    {
-        // ILUMINAÇÃO GOURAUD PARA PAREDES/PLANOS
-        // A iluminação já foi calculada no vertex shader e interpolada
-        
+    {        
         // Coordenadas de textura do arquivo OBJ
         U = texcoords.x;
         V = texcoords.y;

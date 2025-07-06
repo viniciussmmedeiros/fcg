@@ -26,7 +26,7 @@ out vec4 position_world;
 out vec4 position_model;
 out vec4 normal;
 out vec2 texcoords;
-out vec3 gouraud_color; // Cor calculada para iluminação Gouraud
+out vec3 gouraud_color;
 
 void main()
 {
@@ -72,38 +72,34 @@ void main()
     // Coordenadas de textura obtidas do arquivo OBJ (se existirem!)
     texcoords = texture_coefficients;
 
-    // CÁLCULO DA ILUMINAÇÃO GOURAUD PARA PAREDES/PLANOS
+    // FONTE: BASEADO NO LABORATÓRIO 4 E 5
+    // CÁLCULO DA ILUMINAÇÃO GOURAUD PARA PAREDES/PLANOS/CAIXAS
     if (object_id == PLANE || object_id == FLOOR || object_id == WALL || object_id == CEILING || object_id == BOX) {
-        // Cálculos de iluminação no vertex shader (Gouraud)
         vec4 origin = vec4(0.0, 0.0, 0.0, 1.0);
         vec4 camera_position = inverse(view) * origin;
         
         vec4 p = position_world;
         vec4 n = normalize(normal);
-        vec4 l = normalize(vec4(0.0,1.0,0.5,0.0)); // Mesma luz do fragment shader
+        vec4 l = normalize(vec4(0.0, 1.0, 0.5, 0.0));
         vec4 v = normalize(camera_position - p);
         vec4 r = -l + 2 * n * dot(n,l);
         
-        // Propriedades do material para paredes/planos
-        vec3 Kd = vec3(1.0, 1.0, 1.0); // Será modulado pela textura no fragment shader
-        vec3 Ks = vec3(0.1,0.1,0.1);
-        vec3 Ka = vec3(0.02,0.02,0.02);
+        vec3 Kd = vec3(1.0, 1.0, 1.0);
+        vec3 Ks = vec3(0.1, 0.1, 0.1);
+        vec3 Ka = vec3(0.02, 0.02, 0.02);
         float q = 5.0;
         
-        vec3 I = vec3(1.2,1.2,1.2);
-        vec3 Ia = vec3(0.4,0.4,0.4);
+        vec3 I = vec3(1.2, 1.2, 1.2);
+        vec3 Ia = vec3(0.4, 0.4, 0.4);
         
-        // Calcular iluminação Gouraud
-        vec3 lambert_diffuse_term = Kd * I * max(0,dot(n,l));
+        vec3 lambert_diffuse_term = Kd * I * max(0, dot(n, l));
         vec3 ambient_term = Ka * Ia;
         vec3 phong_specular_term = Ks * I * pow(max(0, dot(r,v)), q);
         vec3 minimum_lighting = Kd * 0.2;
         
         gouraud_color = lambert_diffuse_term + ambient_term + phong_specular_term + minimum_lighting;
     } else {
-        // Para objetos com iluminação Phong (esfera, cow, bunny), 
-        // não calculamos iluminação aqui
-        gouraud_color = vec3(1.0, 1.0, 1.0); // Valor neutro
+        gouraud_color = vec3(1.0, 1.0, 1.0);
     }
 }
 
