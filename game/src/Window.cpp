@@ -2,6 +2,10 @@
 #include <stdexcept>
 #include <cstdio>
 
+// FONTE: laboratórios. O código deste arquivo é majoritariamente baseado
+// no código dos labs, com alguns ajustes para a estrutura de orientação
+// a objetos, como a implementação do método 'framebufferSizeCallback'.
+
 void ErrorCallback(int error, const char* description) {
     fprintf(stderr, "ERROR: GLFW: %s\n", description);
 }
