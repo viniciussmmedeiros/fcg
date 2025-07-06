@@ -5,7 +5,7 @@
 #include "Model.h"
 #include "Input.h"
 #include "Texture.h"
-#include "Collisions.h"
+#include "collisions.h"
 #include "TextRenderer.h" 
 #include <memory>
 #include <map>

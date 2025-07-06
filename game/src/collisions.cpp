@@ -1,4 +1,4 @@
-#include "Collisions.h"
+#include "collisions.h"
 #include "matrices.h"
 
 bool Collisions::CheckAABBCollision(const AABB& a, const AABB& b) {
