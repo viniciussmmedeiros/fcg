@@ -9,16 +9,19 @@ using namespace std;
 
 class Texture {
     private:
+        // id da textura na gpu
         GLuint textureId;
         GLuint samplerId;
+        // slot onde a textura está
         GLuint textureUnit;
     public:
+        // método para carregar e configurar uma textura
         void LoadTextureImage(const char* filename, const GLuint numLoadedTextures); // Função que carrega imagens de textura
         
-        GLuint getTextureId() const;
-        GLuint getSamplerId() const;
-        GLuint getTextureUnit() const;
+        // getter para buscar o slot da textura
+        GLuint getTextureUnit();
 
-        void bind() const;
-        void unbind() const;
+        // métodos para ativar ou desativar a textura
+        void bind();
+        void unbind();
 };

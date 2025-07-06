@@ -4,6 +4,8 @@
 #include <stb_image.h>
 
 void Texture::LoadTextureImage(const char* filename, const GLuint numLoadedTextures) {
+    // FONTE: laboratório 5, função "LoadTextureImage". Com ajustes para usar a classe Texture.
+    
     // Primeiro fazemos a leitura da imagem do disco
     stbi_set_flip_vertically_on_load(true);
     int width;
@@ -47,25 +49,17 @@ void Texture::LoadTextureImage(const char* filename, const GLuint numLoadedTextu
     stbi_image_free(data);
 }
 
-GLuint Texture::getTextureId() const {
-    return textureId;
-}
-
-GLuint Texture::getSamplerId() const {
-    return samplerId;
-}
-
-GLuint Texture::getTextureUnit() const {
+GLuint Texture::getTextureUnit() {
     return textureUnit;
 }
 
-void Texture::bind() const {
+void Texture::bind() {
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, textureId);
     glBindSampler(textureUnit, samplerId);
 }
 
-void Texture::unbind() const {
+void Texture::unbind() {
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindSampler(textureUnit, 0);
