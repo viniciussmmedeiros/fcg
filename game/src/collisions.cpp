@@ -40,6 +40,9 @@ Collisions::AABB Collisions::CreateCowAABB(const glm::vec3& position) {
     };
 }
 
+// altura: de 0 a size (1)
+// size/2 nas direções x e z, considerando que 'position' é o centro e size é 1,
+// criamos uma 'caixa' que engloba o nosso cubo
 Collisions::AABB Collisions::CreateBoxAABB(const glm::vec3& position, float size) {
     return {
         position + glm::vec3(-size/2.0f, 0.0f, -size/2.0f),
@@ -47,14 +50,18 @@ Collisions::AABB Collisions::CreateBoxAABB(const glm::vec3& position, float size
     };
 }
 
-Collisions::AABB Collisions::CreateCeilingAABB(const glm::vec3& position, float size) {
+// cria uma 'caixa' de apenas 0.04 unidades de altura, centralizada em 'position',
+// para fazer o teste de colisão com o cubo
+Collisions::AABB Collisions::CreateTileAABB(const glm::vec3& position, float size) {
     return {
         position + glm::vec3(-size, -0.02f, -size),
         position + glm::vec3(size, 0.02f, size)
     };
 }
 
-
+// verificamos apenas os eixos x e y, ignorando a altura, pois só
+// queremos saber se horizontalmente a caixa está de alguma forma
+// sobre esse pedaço do piso
 bool Collisions::CheckBoxPlacement(const AABB& box, const AABB& tile) {
     bool x_overlap = (box.min.x <= tile.max.x && box.max.x >= tile.min.x);
     

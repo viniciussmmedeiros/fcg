@@ -87,6 +87,6 @@ class Game {
 
         bool showInfoText = true;
         void renderInfoText();
-        void renderPermanentText();
+        void renderFixedText();
         void renderFPS();
 };

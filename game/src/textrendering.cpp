@@ -14,6 +14,8 @@
 #include "utils.h"
 #include "dejavufont.h"
 
+// FONTE: textrendering.cpp do laboratório.
+
 static GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id)
 {
     GLuint program_id = glCreateProgram();

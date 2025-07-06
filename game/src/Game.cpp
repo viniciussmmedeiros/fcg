@@ -43,7 +43,7 @@ void Game::init() {
     boxPositions = {
         glm::vec3(2.0f, -0.4f, 2.0f),
         glm::vec3(-2.0f, -0.4f, -2.0f),
-        glm::vec3(1.0f, -0.4f, -3.0f)
+        glm::vec3(2.0f, -0.4f, -3.0f)
     };
 
     boxInPlace.resize(boxPositions.size(), false);
@@ -51,13 +51,13 @@ void Game::init() {
     boxColors.push_back(glm::vec3(0.2f, 1.0f, 0.2f));
     boxColors.push_back(glm::vec3(0.2f, 0.2f, 1.0f));
 
+    // -0.99 pois em -1 o 'ladrilho' fica competindo com o chão
     tilePositions.push_back(glm::vec3(4.0f, -0.99f, 4.0f));
     tilePositions.push_back(glm::vec3(-4.0f, -0.99f, 4.0f));
     tilePositions.push_back(glm::vec3(0.0f, -0.99f, -4.0f));
 
     try {
         // FONTE: Laboratórios
-
         shader.reset(new Shader("../../src/shader_vertex.glsl", "../../src/shader_fragment.glsl"));
 
         textures["earth"] = std::unique_ptr<Texture>(new Texture());
@@ -108,7 +108,7 @@ void Game::run() {
 
         render();
         renderInfoText();
-        renderPermanentText();
+        renderFixedText();
         renderFPS(); 
         renderWinMessage();
 
@@ -133,32 +133,42 @@ void Game::render() {
     glm::mat4 viewMatrix = camera.getVirtualCamera();
     glm::mat4 projectionMatrix = camera.getProjectionMatrix(window.getScreenRatio());
 
+    // ativamos o shader e enviamos os dados de view e projeção
     shader->use();
     shader->setMat4("view", viewMatrix);
     shader->setMat4("projection", projectionMatrix);
+    // por pdrão a cor dos objetos é setada para 1,1,1, para manter a cor da textura
     shader->setVec3("object_game_color", glm::vec3(1.0f, 1.0f, 1.0f));
 
+    // buscamos as localizações armazenadas para informar nossos dados de bbox de cada model
     GLint g_bbox_min_uniform = shader->getBBoxMinUniform();
     GLint g_bbox_max_uniform = shader->getBBoxMaxUniform();
-    textures["earth"]->bind();
-    shader->setInt("TextureImage0", textures["earth"]->getTextureUnit());
     
     float t = sphereAnimationTime / sphereAnimationDuration;
     t = fmod(t, 1.0f); // garantir que t permaneça entre 0 e 1
+    // o ponto de teste definido para fazer parte da trajetória da esfera na animação
     glm::vec3 testPoint = glm::vec3(0.20f, 1.25f, 0.0f);
-    float sphereRadius = 0.3f; // o raio original da esfera é 1, mas aplicamos um 'matrix_scale' de 0.3
+    float sphereRadius = 0.3f; // o raio original da esfera é 1, mas depois aplicaremos um 'matrix_scale' de 0.3
     glm::vec3 spherePosition = bezierCubic(sphereBezierP0, sphereBezierP1, sphereBezierP2, sphereBezierP3, t);
 
+    // verificamos se houve colisão do ponto de teste com a esfera, se sim definimos a cor dela para vermelho
     bool hitPoint = Collisions::CheckPointSphereCollision(testPoint, spherePosition, sphereRadius);
     if(hitPoint) {
         shader->setVec3("object_game_color", glm::vec3(252.0f, 0, 0));
     }
+
+    // desenha a esfera
+    textures["earth"]->bind();
+    shader->setInt("TextureImage0", textures["earth"]->getTextureUnit());
     glm::mat4 modelMatrix = Matrix_Translate(spherePosition.x, spherePosition.y, spherePosition.z) * Matrix_Scale(0.3f, 0.3f, 0.3f);
     shader->setMat4("model", modelMatrix);
     shader->setInt("object_id", 0);
     models["sphere"]->draw("the_sphere", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["earth"]->unbind();
+    
+    // temos que 'resetar' a cor, pois é possível que a condição 'hitPoint' tenha sido atingida, evitando deixar tudo vermelho
     shader->setVec3("object_game_color", glm::vec3(1.0f, 1.0f, 1.0f));
+    
     // desenha a vaca
     textures["cow"]->bind();
     shader->setInt("TextureImage0", textures["cow"]->getTextureUnit());
@@ -235,6 +245,7 @@ void Game::render() {
         glm::vec3(5.0f, 2.0f, 5.1f)
     });
     
+    //desenha o teto
     textures["ceiling"]->bind();
     shader->setInt("TextureImage0", textures["ceiling"]->getTextureUnit());
     modelMatrix = Matrix_Translate(0.0f, 2.0f, 0.0f) 
@@ -244,6 +255,9 @@ void Game::render() {
     models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
     textures["ceiling"]->unbind();
 
+
+    // atualizamos o valor de frontface para ser em sentido horário, para renderizar os cubos corretamente
+    glFrontFace(GL_CW);
     for (size_t i = 0; i < boxPositions.size(); ++i) {
         textures["box"]->bind();
         shader->setInt("TextureImage0", textures["box"]->getTextureUnit());
@@ -256,8 +270,13 @@ void Game::render() {
         models["cube"]->draw("the_cube", g_bbox_min_uniform, g_bbox_max_uniform);
         textures["box"]->unbind();
     }
+    // retornamos o valor de frontface para sentido antihorário
+    glFrontFace(GL_CCW); 
 
+    // resetamos o valor de cor, pois desenhamos caixas coloridas acima
     shader->setVec3("object_game_color", glm::vec3(1.0f, 1.0f, 1.0f)); 
+    
+    // desenha o chão
     textures["floor"]->bind();
     shader->setInt("TextureImage0", textures["floor"]->getTextureUnit());
     for (size_t i = 0; i < tilePositions.size(); ++i) {
@@ -304,6 +323,10 @@ void Game::handleKeyCallback(int key, int scancode, int action, int mod) {
     if (action == GLFW_RELEASE) {
         keyPressed[key] = false;
     }
+
+    if (keyPressed[GLFW_KEY_V]) {
+        camera.setUseFreeCamera(!camera.getUseFreeCamera());
+    }
 }
 
 void Game::handleMouseButton(int button, int action, int mod) {
@@ -345,23 +368,20 @@ void Game::processCowMovement(float deltaTime) {
         glfwSetWindowShouldClose(window.getNativeWindow(), true);
     }
     
+    // calculamos uma rotação para a vaca conforme o movimento horizontal da câmera livre
     cowOrientation = Matrix_Rotate_Y(camera.getFreeCameraTheta() - M_PI / 2);
 
     glm::vec3 cowForward(1.0f, 0.0f, 0.0f); // +x é para frente
     glm::vec3 cowRight(0.0f, 0.0f, 1.0f); // +z é direita
 
-    const float distance_from_cow = 2.0f;
-    const float height_above_cow = 1.0f;
+    const float distanceRelativeToCow = 2.0f;
+    const float heightRelativeToCow = 1.0f;
     glm::vec4 view_vector = camera.getCameraViewVector();
-    glm::vec4 offset = -distance_from_cow * glm::normalize(view_vector);
+    glm::vec4 offset = -distanceRelativeToCow * glm::normalize(view_vector);
     glm::vec4 new_camera_pos = glm::vec4(cowPosition, 1.0f) + offset;
-    new_camera_pos.y += height_above_cow;
+    new_camera_pos.y += heightRelativeToCow;
 
     camera.setFreeCameraPosition(new_camera_pos);
-
-    if (keyPressed[GLFW_KEY_V]) {
-        camera.setUseFreeCamera(!camera.getUseFreeCamera());
-    }
 
     // Velocidade da vaca em unidades por segundo
     float speed_cow = 2.0f;
@@ -412,7 +432,7 @@ void Game::updateSphereAnimation(float deltaTime) {
     sphereAnimationTime += deltaTime;
 }
 
-void Game::renderPermanentText() {
+void Game::renderFixedText() {
     TextRendering_PrintString(window.getNativeWindow(), "Pressione H para habilitar / desabilitar a ajuda.", -0.95f, 0.75f, 0.6f);
 }
 
@@ -438,6 +458,7 @@ void Game::renderWinMessage() {
 }
 
 void Game::renderFPS() {
+    // FONTE: laboratório. Função "TextRendering_ShowFramesPerSecond".
     static float old_seconds = 0.0f;
     static int   ellapsed_frames = 0;
     static char  buffer[20] = "?? fps";
@@ -463,12 +484,13 @@ void Game::updateGameState() {
         return;
     }
 
+    // contador para as caixas corretamente posicionadas nos ladrilhos
     correctPlacementsCount = 0;
     float tile_size = 0.8f;
 
     for (size_t i = 0; i < boxPositions.size(); ++i) {
         Collisions::AABB box_aabb = Collisions::CreateBoxAABB(boxPositions[i], boxSize);
-        Collisions::AABB tile_aabb = Collisions::CreateCeilingAABB(tilePositions[i], tile_size);
+        Collisions::AABB tile_aabb = Collisions::CreateTileAABB(tilePositions[i], tile_size);
 
         if (Collisions::CheckBoxPlacement(box_aabb, tile_aabb)) {
             boxInPlace[i] = true;
@@ -478,6 +500,7 @@ void Game::updateGameState() {
         }
     }
     
+    // se todas as caixas estão posicionadas corretamente, então 'venceu'.
     if (correctPlacementsCount == boxPositions.size()) {
         gameWon = true;
     }

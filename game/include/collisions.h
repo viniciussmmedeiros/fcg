@@ -20,5 +20,5 @@ public:
     
     static AABB CreateCowAABB(const glm::vec3& position);
     static AABB CreateBoxAABB(const glm::vec3& position, float size);
-    static AABB CreateCeilingAABB(const glm::vec3& position, float size);
+    static AABB CreateTileAABB(const glm::vec3& position, float size);
 };
